@@ -57,11 +57,11 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 
 ### Backtest on matured markets
 - [x] History backfill task (`ballast.backfill_history`): 289 stable markets within 18 months on Ethereum/Arbitrum/Base found; hourly points stored
-- [ ] Discover Pendle markets matured in the last 12–18 months on allowed chains (include failed/delisted: no survivorship bias)
-- [ ] Reconstruct historical PT price / implied APY, liquidity and slippage; if history is not available via API, record that explicitly
-- [ ] Historical gas cost model
-- [ ] Backtest engine using the same Allocator + `ITxExecutor` (historical simulator)
-- [ ] Tuning / validation time split; thresholds chosen only on tuning data
+- [ ] Discover Pendle markets matured in the last 12–18 months on allowed chains (include failed/delisted: no survivorship bias) — backfill running
+- [x] Reconstruct historical PT price (from implied APY), liquidity (pool TVL) and slippage (heuristic); gaps recorded in the report
+- [x] Historical gas cost model (explicit assumption: fixed gwei per chain x historical ETH price; no free L2 gas history)
+- [x] Backtest engine reusing Analyzer + PaperEngine (same decision code as live)
+- [x] Tuning / validation time split; premiums chosen only on tuning data (`ballast backtest`)
 
 ### NLY Calculator and Cost Model
 - [x] `ICostModel`: entry/exit gas, pool/protocol fees, slippage (liquidity heuristic + quoted-impact model)
@@ -75,7 +75,7 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 - [x] `IRiskRule` set: age & audits, TVL level and trend, par redemption path, depeg history, oracle dependency, centralized counterparties, pause/admin keys
 - [x] Risk score per asset/protocol; tier assignment; entry threshold = parking + tier premium (+ 0.02 pp per risk point)
 - [x] Incident catalog (`config/incidents.yaml` + `docs/research/incidents.md`, 31 entries) with sources: synthetic stablecoin depegs and collapses, protocol hacks, freezes
-- [ ] Per tier: premium over parking vs historical incident losses (does the risk pay?)
+- [ ] Per tier: premium over parking vs historical incident losses (does the risk pay?) — adjustment in backtest metrics done; per-tier table pending
 
 ### Allocator
 - [x] Limits: per protocol 35%, Tier B 25%, per B asset 15%, max maturity 183 days, reserve 5%, min position
