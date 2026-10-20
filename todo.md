@@ -49,13 +49,14 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 - [ ] Parking rates: Aave v3 / Compound v3 via DefiLlama (done); on-chain Aave `getReserveData` cross-check (pending)
 - [x] Dated futures vs spot: public prices (Binance, OKX, Deribit) → annualized basis (data only)
 - [x] Gas price collector per chain (L2 execution + L1 data fee)
-- [ ] Celery beat schedule: snapshots every 15 min; retries, backoff, rate-limit handling
+- [x] Celery beat schedule: scan every 15 min, quotes hourly, history daily, digests; retries/backoff/rate limits in http client
 - [x] Opportunity Normalizer: all sources → `Opportunity`
 - [x] Collect + analyze pipeline (`ballast.pipeline`): sources → NLY → risk → allocation, verified live end-to-end
 - [x] Scan runner + CLI (`ballast scan`): persists snapshots, NLY, risk, decisions, paper books `all` / `l2`; verified live on Postgres
 - [ ] Cost cross-chain moves (USDC via CCTP, USDS bridges) between parking and positions on different chains
 
 ### Backtest on matured markets
+- [x] History backfill task (`ballast.backfill_history`): 289 stable markets within 18 months on Ethereum/Arbitrum/Base found; hourly points stored
 - [ ] Discover Pendle markets matured in the last 12–18 months on allowed chains (include failed/delisted: no survivorship bias)
 - [ ] Reconstruct historical PT price / implied APY, liquidity and slippage; if history is not available via API, record that explicitly
 - [ ] Historical gas cost model
@@ -64,7 +65,8 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 
 ### NLY Calculator and Cost Model
 - [x] `ICostModel`: entry/exit gas, pool/protocol fees, slippage (liquidity heuristic + quoted-impact model)
-- [ ] Feed live Pendle price-impact quotes into `QuotedSlippage`; calibrate heuristic vs quotes and fork runs
+- [x] Hourly Pendle convert quotes stored (AMM-only and with limit orders) and fed into `QuotedSlippage`
+- [ ] Calibrate gas units / venue fee / slippage heuristic against quotes and fork runs
 - [x] NLY = (payoff at maturity − entry cost − gas in/out − slippage − fees) / capital / term → APY and % per month
 - [ ] Min position size such that gas ≤ 0.3% (done: `min_position_usd`); max position size from liquidity impact (in Allocator)
 - [x] Unit + hypothesis property tests (monotonicity, decimals round-trip, conservative rounding)
@@ -92,11 +94,11 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 - [x] Maturity handling: redeem at par (peg-capped) → idle → reallocate
 
 ### Monitoring (research mode)
-- [ ] Monitors: peg deviation, TVL drop, contract pause, rate spike, oracle status → events in DB + alerts
+- [ ] Monitors: peg deviation, TVL drop, rate spike, parking moves, source errors → events in DB + alerts (done); contract pause / oracle status (pending, needs on-chain reads)
 
 ### Telegram
-- [ ] Notifier (HTML), emojis, bold, separators, plain-language explanations
-- [ ] Alerts: new opportunities above threshold, daily and weekly summaries, risk events
+- [x] Notifier (HTML), emojis, bold, separators, plain-language explanations
+- [x] Alerts: new opportunities above threshold, daily and weekly summaries, risk events (DB-driven, notifier role only)
 
 ### Docker (local)
 - [ ] Dockerfiles; `docker-compose.local.yml`: postgres, redis, migrations, beat, collector worker, analytics worker, telegram worker, fork simulator

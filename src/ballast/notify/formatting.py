@@ -6,6 +6,7 @@ All dynamic values are HTML-escaped. Numbers are shown as estimates, never as pr
 from __future__ import annotations
 
 from collections.abc import Sequence
+from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from html import escape
@@ -32,26 +33,53 @@ def _usd(value: Decimal) -> str:
     return f"${value:,.2f}".replace(",", " ")
 
 
-def _days(c: Candidate) -> str:
-    return f"{c.nly.days:.0f} дн."
+@dataclass(frozen=True, slots=True)
+class OpportunityView:
+    """What an opportunity alert needs; built from a Candidate or from stored rows."""
+
+    asset_symbol: str
+    chain: str
+    tier: str
+    nly_apy: Decimal
+    nly_monthly: Decimal
+    threshold_apy: Decimal | None
+    days: Decimal
+    risk_score: Decimal
+    gas_usd: Decimal
+    fees_usd: Decimal
+    slippage_usd: Decimal
+
+    @classmethod
+    def from_candidate(cls, c: Candidate) -> OpportunityView:
+        return cls(
+            asset_symbol=c.opportunity.asset_symbol,
+            chain=c.opportunity.chain.slug,
+            tier=c.risk.tier.value,
+            nly_apy=c.nly.nly_apy,
+            nly_monthly=c.nly.nly_monthly,
+            threshold_apy=c.threshold_apy,
+            days=c.nly.days,
+            risk_score=c.risk.score,
+            gas_usd=c.nly.costs.gas_usd,
+            fees_usd=c.nly.costs.fees_usd,
+            slippage_usd=c.nly.costs.slippage_usd,
+        )
 
 
-def format_opportunities(candidates: Sequence[Candidate], parking_apy: Decimal) -> str:
+def format_opportunities(views: Sequence[OpportunityView], parking_apy: Decimal | None) -> str:
     lines = [
         "🟢 <b>Новые возможности выше порога</b>",
         SEP,
         f"«Парковка» сейчас: <b>{_pct(parking_apy)}</b> годовых",
         "",
     ]
-    for c in candidates:
-        o = c.opportunity
+    for v in views:
         lines += [
-            f"<b>{escape(o.asset_symbol)}</b> · {escape(o.chain.slug)} · уровень {c.risk.tier.value}",
-            f"  Чистая доходность (NLY): <b>{_pct(c.nly.nly_apy)}</b> годовых "
-            f"({_pct(c.nly.nly_monthly)} в мес.)",
-            f"  Порог входа: {_pct(c.threshold_apy)} · срок {_days(c)} · риск {c.risk.score:.0f}/100",
-            f"  Издержки: газ {_usd(c.nly.costs.gas_usd)}, комиссии {_usd(c.nly.costs.fees_usd)}, "
-            f"проскальзывание {_usd(c.nly.costs.slippage_usd)}",
+            f"<b>{escape(v.asset_symbol)}</b> · {escape(v.chain)} · уровень {escape(v.tier)}",
+            f"  Чистая доходность (NLY): <b>{_pct(v.nly_apy)}</b> годовых ({_pct(v.nly_monthly)} в мес.)",
+            f"  Порог входа: {_pct(v.threshold_apy)} · срок {v.days:.0f} дн. · риск {v.risk_score:.0f}/100",
+            f"  Издержки: газ {_usd(v.gas_usd)}, комиссии {_usd(v.fees_usd)}, "
+            f"проскальзывание {_usd(v.slippage_usd)}",
             "",
         ]
     lines += [

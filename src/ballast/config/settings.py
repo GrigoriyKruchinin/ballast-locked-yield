@@ -198,7 +198,8 @@ class RoleSettings(BaseModel):
 _ROLE_GROUPS: dict[Role, frozenset[str]] = {
     Role.MIGRATIONS: frozenset({"db"}),
     Role.BEAT: frozenset({"redis", "data"}),
-    Role.COLLECTOR: frozenset({"db", "redis", "chains", "data", "risk"}),
+    # The collector runs the full scan (collect + analyze + paper step); no Telegram token.
+    Role.COLLECTOR: frozenset({"db", "redis", "chains", "data", "costs", "risk", "allocation"}),
     Role.ANALYTICS: frozenset({"db", "redis", "chains", "data", "costs", "risk", "allocation"}),
     Role.NOTIFIER: frozenset({"db", "redis", "telegram"}),
     Role.SIMULATOR: frozenset({"db", "redis", "chains", "costs", "fork"}),

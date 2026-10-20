@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 
 from sqlalchemy import func, select
@@ -41,6 +41,10 @@ from ballast.storage.models import (
     RiskScoreRow,
     ScanRow,
 )
+
+
+def _utc(value: datetime) -> datetime:
+    return value if value.tzinfo is not None else value.replace(tzinfo=UTC)
 
 
 @dataclass(slots=True)
@@ -161,6 +165,43 @@ class SnapshotRepository:
                 gas_used=gas_used,
             )
         )
+
+    async def previous_market_apy(self) -> dict[str, Decimal]:
+        """Latest stored implied APY per portfolio-chain market, keyed like ``Opportunity.key``."""
+        latest = (
+            select(
+                PendleMarketSnapshotRow.chain_id, func.max(PendleMarketSnapshotRow.observed_at).label("at")
+            )
+            .group_by(PendleMarketSnapshotRow.chain_id)
+            .subquery()
+        )
+        rows = await self.session.execute(
+            select(
+                PendleMarketSnapshotRow.chain_id,
+                PendleMarketSnapshotRow.market,
+                PendleMarketSnapshotRow.implied_apy,
+            ).join(
+                latest,
+                (PendleMarketSnapshotRow.chain_id == latest.c.chain_id)
+                & (PendleMarketSnapshotRow.observed_at == latest.c.at),
+            )
+        )
+        out: dict[str, Decimal] = {}
+        for chain_id, market, apy in rows.all():
+            if apy is None or chain_id not in {int(c) for c in Chain}:
+                continue
+            out[f"pendle:{Chain(chain_id).slug}:{market.lower()}"] = apy
+        return out
+
+    async def previous_parking_apy(self) -> dict[str, Decimal]:
+        latest = select(func.max(ParkingSnapshotRow.observed_at)).scalar_subquery()
+        rows = await self.session.scalars(
+            select(ParkingSnapshotRow).where(ParkingSnapshotRow.observed_at == latest)
+        )
+        return {
+            f"parking:{r.protocol}:{Chain(r.chain_id).slug}:{r.asset_symbol}:{r.pool_id[:8]}": r.apy_base
+            for r in rows.all()
+        }
 
     async def latest_gas(self, max_age: timedelta) -> dict[Chain, GasSnapshot]:
         cutoff = utcnow() - max_age
@@ -329,6 +370,23 @@ class MonitorRepository:
             )
             for e in events
         )
+
+    async def recent(self, since: datetime) -> list[tuple[str, str, str, datetime]]:
+        rows = await self.session.execute(
+            select(
+                MonitorEventRow.kind,
+                MonitorEventRow.subject,
+                MonitorEventRow.severity,
+                MonitorEventRow.observed_at,
+            ).where(MonitorEventRow.observed_at >= since)
+        )
+        return [(k, s, sev, _utc(at)) for k, s, sev, at in rows.all()]
+
+    async def mark_notified(self, ids: Iterable[int]) -> None:
+        for event_id in ids:
+            row = await self.session.get(MonitorEventRow, event_id)
+            if row is not None:
+                row.notified = True
 
     async def unnotified(self, limit: int = 50) -> list[MonitorEventRow]:
         rows = await self.session.scalars(

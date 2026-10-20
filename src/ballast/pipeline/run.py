@@ -7,8 +7,18 @@ from datetime import timedelta
 from decimal import Decimal
 
 from ballast.costs.model import GasSnapshot
-from ballast.domain.models import Candidate, Chain, Decision, DecisionAction, Opportunity
+from ballast.domain.models import (
+    Candidate,
+    Chain,
+    Decision,
+    DecisionAction,
+    MonitorEvent,
+    Opportunity,
+    Severity,
+    utcnow,
+)
 from ballast.logging import get_logger
+from ballast.monitor.monitors import THROTTLE, MonitorInputs, RiskMonitor, throttle
 from ballast.nly.calculator import NlyCalculator
 from ballast.pipeline.analyze import AnalysisInputs, AnalysisResult
 from ballast.pipeline.collect import TVL_REFRESH, CollectedData, persist
@@ -17,7 +27,7 @@ from ballast.portfolio.paper import LockedPosition, PaperEngine, PaperState
 from ballast.portfolio.store import load_state, save_daily, save_state
 from ballast.risk.rules import MarketState
 from ballast.storage.db import session_scope
-from ballast.storage.repositories import ScanRepository, SnapshotRepository
+from ballast.storage.repositories import MonitorRepository, ScanRepository, SnapshotRepository
 
 log = get_logger(__name__)
 
@@ -47,6 +57,7 @@ class ScanSummary:
     n_markets: int
     n_whitelisted: int
     books: list[BookSummary]
+    events: list[MonitorEvent] = field(default_factory=list)
 
 
 async def _market_inputs(ctx: AppContext, data: CollectedData) -> AnalysisInputs:
@@ -151,7 +162,11 @@ async def _run_book(
 
 async def run_scan(ctx: AppContext) -> ScanSummary:
     async with session_scope(ctx.sessions) as session:
-        latest_tvl = await SnapshotRepository(session).latest_tvl(TVL_REFRESH)
+        snapshots = SnapshotRepository(session)
+        latest_tvl = await snapshots.latest_tvl(TVL_REFRESH)
+        previous_apy = await snapshots.previous_market_apy()
+        previous_parking = await snapshots.previous_parking_apy()
+        recent = await MonitorRepository(session).recent(utcnow() - THROTTLE)
     data = await ctx.collector.collect(include_tvl=not latest_tvl)
     async with session_scope(ctx.sessions) as session:
         persist(data, SnapshotRepository(session), ctx.whitelist)
@@ -160,6 +175,22 @@ async def run_scan(ctx: AppContext) -> ScanSummary:
     for book in ctx.books:
         summary, _ = await _run_book(ctx, book, data, inputs)
         summaries.append(summary)
+    events = _monitor(ctx, data, previous_apy, previous_parking)
+    for summary in summaries:
+        events += [
+            MonitorEvent(
+                "opportunity",
+                Severity.INFO,
+                c.opportunity.key,
+                f"{summary.book}",
+                c.nly.nly_apy,
+                data.observed_at,
+            )
+            for c in summary.eligible
+        ]
+    events = throttle(events, recent)
+    async with session_scope(ctx.sessions) as session:
+        MonitorRepository(session).add(events)
     n_wl = sum(
         1
         for o in data.opportunities
@@ -172,7 +203,31 @@ async def run_scan(ctx: AppContext) -> ScanSummary:
         errors=len(data.errors),
         books={s.book: str(round(s.total_value_usd, 2)) for s in summaries},
     )
-    return ScanSummary(errors=data.errors, n_markets=len(data.pendle), n_whitelisted=n_wl, books=summaries)
+    return ScanSummary(
+        errors=data.errors, n_markets=len(data.pendle), n_whitelisted=n_wl, books=summaries, events=events
+    )
+
+
+def _monitor(
+    ctx: AppContext,
+    data: CollectedData,
+    previous_apy: dict[str, Decimal],
+    previous_parking: dict[str, Decimal],
+) -> list[MonitorEvent]:
+    risk = ctx.settings.risk
+    if risk is None:
+        return []
+    inputs = MonitorInputs(
+        observed_at=data.observed_at,
+        pegs=data.pegs,
+        tvl=data.tvl,
+        opportunities=data.opportunities,
+        previous_apy=previous_apy,
+        parking=data.parking,
+        previous_parking_apy=previous_parking,
+        errors=data.errors,
+    )
+    return RiskMonitor(ctx.whitelist, risk).evaluate(inputs)
 
 
 def skipped(decisions: list[Decision]) -> list[Decision]:
