@@ -84,9 +84,9 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 - [x] Tests for every limit and edge case
 
 ### Fork Simulator (Anvil)
-- [ ] `ITxExecutor` fork implementation: spawn Anvil fork (Arbitrum/Base), fund test account, run entry/exit via Pendle router
-- [ ] Exact approvals, `minOut`, whitelist and recipient checks shared with future live executor
-- [ ] Compare simulated result vs model; tolerance 0.3%; store results
+- [x] `ITxExecutor` fork implementation: spawn Anvil fork, fund test account (storage-slot probe), run entry/exit via Pendle router
+- [x] Exact approvals, `minOut`, whitelist and recipient checks shared with future live executor (`TxGuard`, tested)
+- [x] Compare simulated result vs model; tolerance 0.3%; store results (first run: +0.01% vs model, +0.0005% vs quote)
 
 ### Paper Portfolio
 - [x] Virtual 10,000 USD portfolio engine incl. gas and slippage (value-conservation property test); two books: `all` and `l2`
@@ -102,7 +102,7 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 
 ### Docker (local)
 - [x] Dockerfile; `docker-compose.local.yml`: postgres, redis, migrations, beat, collector, analytics, telegram workers (verified live)
-- [ ] Fork simulator service (with the fork simulation task)
+- [x] Fork simulator service (`simulator`, daily `ballast.simulate`, Anvil v1.8.5 in image)
 - [x] Healthchecks for all services; `depends_on: condition: service_healthy`; per-role env subsets (secret isolation verified)
 - [x] `.github/workflows/ci.yml`: ruff, mypy, migrations on Postgres, pytest, `docker compose config`, image build
 

@@ -18,6 +18,7 @@ from ballast.notify.service import send_digest
 from ballast.notify.telegram import TelegramClient, TelegramError
 from ballast.pipeline.context import app_context, books
 from ballast.pipeline.run import run_scan
+from ballast.pipeline.simulate import run_simulations
 from ballast.storage.db import make_engine, make_sessionmaker
 
 
@@ -123,6 +124,24 @@ async def _backtest(output: str) -> int:
     return 0
 
 
+async def _simulate() -> int:
+    settings = settings_for_role(Role.ANALYTICS)
+    async with app_context(settings) as ctx:
+        outcomes = await run_simulations(ctx)
+    if not outcomes:
+        print("no risk-allowed candidates to simulate (run a scan first)")
+        return 0
+    failed = 0
+    for o in outcomes:
+        model = "n/a" if o.deviation_vs_model is None else f"{o.deviation_vs_model:+.4%}"
+        quote = "n/a" if o.deviation_vs_quote is None else f"{o.deviation_vs_quote:+.4%}"
+        status = "OK  " if o.success and o.within_tolerance is not False else "FAIL"
+        failed += status == "FAIL"
+        line = f"{status} {o.leg:5} {o.key[:48]:48} vs_model={model} vs_quote={quote} gas={o.gas_used}"
+        print(line, o.error or "")
+    return 1 if failed else 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="ballast", description="Ballast locked-yield research tool")
     parser.add_argument("--log-level", default="WARNING")
@@ -130,6 +149,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     sub.add_parser("scan", help="collect, analyze and update paper portfolios once")
     sub.add_parser("verify-whitelist", help="check pinned token addresses on-chain (symbol, decimals)")
     sub.add_parser("notify-test", help="send a test Telegram message")
+    sub.add_parser("simulate", help="fork-simulate entry/exit of current candidates on Anvil")
     backtest = sub.add_parser("backtest", help="out-of-sample backtest on stored Pendle history")
     backtest.add_argument("--output", default="docs/reports")
     digest = sub.add_parser("digest", help="send the daily (or --weekly) digest now")
@@ -140,7 +160,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         return asyncio.run(_backtest(args.output))
     if args.command == "digest":
         return asyncio.run(_digest(args.weekly))
-    commands = {"scan": _scan, "verify-whitelist": _verify_whitelist, "notify-test": _notify_test}
+    commands = {
+        "scan": _scan,
+        "verify-whitelist": _verify_whitelist,
+        "notify-test": _notify_test,
+        "simulate": _simulate,
+    }
     return asyncio.run(commands[args.command]())
 
 

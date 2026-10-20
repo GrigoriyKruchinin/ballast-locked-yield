@@ -1,5 +1,6 @@
 # syntax=docker/dockerfile:1.7
 FROM ghcr.io/astral-sh/uv:0.9.8 AS uv
+FROM ghcr.io/foundry-rs/foundry:v1.8.5 AS foundry
 
 FROM python:3.12-slim AS build
 COPY --from=uv /uv /usr/local/bin/uv
@@ -14,6 +15,8 @@ FROM python:3.12-slim AS runtime
 RUN groupadd --system ballast && useradd --system --gid ballast --home /app --shell /usr/sbin/nologin ballast
 WORKDIR /app
 COPY --from=build --chown=ballast:ballast /app /app
+# Anvil only (fork simulation); no forge/cast needed at runtime.
+COPY --from=foundry /usr/local/bin/anvil /usr/local/bin/anvil
 COPY --chown=ballast:ballast alembic.ini ./
 COPY --chown=ballast:ballast migrations ./migrations
 COPY --chown=ballast:ballast config ./config

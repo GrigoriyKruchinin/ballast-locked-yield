@@ -13,6 +13,7 @@ from ballast.pipeline.context import app_context, books
 from ballast.pipeline.history import backfill_history
 from ballast.pipeline.quotes import refresh_quotes
 from ballast.pipeline.run import run_scan
+from ballast.pipeline.simulate import run_simulations
 from ballast.storage.db import make_engine, make_sessionmaker
 from ballast.workers.celery_app import app
 
@@ -121,5 +122,20 @@ def quotes() -> int:
     async def go() -> int:
         async with app_context(settings) as ctx:
             return await refresh_quotes(ctx)
+
+    return _run(go)
+
+
+@app.task(name="ballast.simulate", time_limit=60 * 60, soft_time_limit=55 * 60)
+def simulate() -> dict[str, int]:
+    settings = settings_for_role(Role.SIMULATOR)
+
+    async def go() -> dict[str, int]:
+        async with app_context(settings) as ctx:
+            outcomes = await run_simulations(ctx)
+        return {
+            "runs": len(outcomes),
+            "ok": sum(1 for o in outcomes if o.success and o.within_tolerance is not False),
+        }
 
     return _run(go)

@@ -117,6 +117,16 @@ services:
       <<: [*app-env, *db-env, *chain-env, *analysis-env]
       WORKER_NAME: analytics
 
+  simulator:
+    <<: *worker
+    command: ["celery", "-A", "ballast.workers.celery_app", "worker", "-Q", "simulate", "-c", "1", "-n", "simulator@%h", "--loglevel", "INFO"]
+    environment:
+      <<: [*app-env, *db-env, *chain-env, *analysis-env]
+      FORK_TOLERANCE_PCT: ${FORK_TOLERANCE_PCT:-0.3}
+      ANVIL_HOST: 127.0.0.1
+      ANVIL_PORT: "8545"
+      WORKER_NAME: simulator
+
   notifier:
     <<: *worker
     command: ["celery", "-A", "ballast.workers.celery_app", "worker", "-Q", "notify", "-c", "1", "-n", "notifier@%h", "--loglevel", "INFO"]

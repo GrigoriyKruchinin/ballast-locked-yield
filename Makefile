@@ -63,7 +63,7 @@ backtest:
 	$(COMPOSE) exec analytics ballast backtest
 
 simulate:
-	$(COMPOSE) exec analytics ballast simulate
+	$(COMPOSE) exec simulator ballast simulate
 
 report:
 	$(COMPOSE) exec analytics ballast report

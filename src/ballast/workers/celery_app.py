@@ -3,7 +3,8 @@
 Queues map to containers (see docker-compose.local.yml):
 - ``scan``: collector worker (RPC + DB): full scan every ``SNAPSHOT_INTERVAL_MINUTES``;
 - ``analytics``: analytics worker: history backfill, quotes, backtests, reports;
-- ``notify``: telegram worker (DB + bot token only): alerts and digests.
+- ``notify``: telegram worker (DB + bot token only): alerts and digests;
+- ``simulate``: fork simulator (Anvil + archive RPC): daily entry/exit checks of current candidates.
 """
 
 from __future__ import annotations
@@ -26,6 +27,7 @@ app.conf.update(
         "ballast.weekly_digest": {"queue": "notify"},
         "ballast.backfill_history": {"queue": "analytics"},
         "ballast.refresh_quotes": {"queue": "analytics"},
+        "ballast.simulate": {"queue": "simulate"},
     },
     task_acks_late=True,
     worker_prefetch_multiplier=1,
@@ -42,5 +44,6 @@ app.conf.update(
             "schedule": crontab(hour=6, minute=10, day_of_week=1),
         },
         "backfill-history": {"task": "ballast.backfill_history", "schedule": crontab(hour=3, minute=0)},
+        "fork-simulation": {"task": "ballast.simulate", "schedule": crontab(hour=4, minute=30)},
     },
 )

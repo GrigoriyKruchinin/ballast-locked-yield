@@ -201,9 +201,9 @@ _ROLE_GROUPS: dict[Role, frozenset[str]] = {
     Role.BEAT: frozenset({"redis", "data"}),
     # The collector runs the full scan (collect + analyze + paper step); no Telegram token.
     Role.COLLECTOR: frozenset({"db", "redis", "chains", "data", "costs", "risk", "allocation"}),
-    Role.ANALYTICS: frozenset({"db", "redis", "chains", "data", "costs", "risk", "allocation"}),
+    Role.ANALYTICS: frozenset({"db", "redis", "chains", "data", "costs", "risk", "allocation", "fork"}),
     Role.NOTIFIER: frozenset({"db", "redis", "telegram"}),
-    Role.SIMULATOR: frozenset({"db", "redis", "chains", "costs", "fork"}),
+    Role.SIMULATOR: frozenset({"db", "redis", "chains", "data", "costs", "risk", "allocation", "fork"}),
     Role.CLI: frozenset({"db", "redis", "chains", "data", "costs", "risk", "allocation", "fork", "telegram"}),
 }
 
