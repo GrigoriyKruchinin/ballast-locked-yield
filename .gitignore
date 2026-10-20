@@ -218,3 +218,40 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- Ballast project-specific ---
+# Secrets and keys
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.keystore
+keystore/
+secrets/
+
+# Local data, DB volumes, dumps
+data/raw/
+data/cache/
+data/dumps/
+pgdata/
+postgres-data/
+redis-data/
+*.dump
+*.sql.gz
+*.parquet
+*.feather
+
+# Foundry
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+anvil-state*.json
+
+# Tooling
+.mypy_cache/
+.ruff_cache/
+.idea/
+.vscode/
+*.swp
+.DS_Store
