@@ -60,10 +60,11 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 - [ ] Tuning / validation time split; thresholds chosen only on tuning data
 
 ### NLY Calculator and Cost Model
-- [ ] `ICostModel`: entry/exit gas, pool/protocol fees, slippage from pool depth (Pendle AMM curve)
-- [ ] NLY = (payoff at maturity − entry cost − gas in/out − slippage − fees) / capital / term → APY and % per month
-- [ ] Min position size such that gas ≤ 0.3%; max position size from liquidity impact
-- [ ] Unit + hypothesis property tests (monotonicity, decimals round-trip, conservative rounding)
+- [x] `ICostModel`: entry/exit gas, pool/protocol fees, slippage (liquidity heuristic + quoted-impact model)
+- [ ] Feed live Pendle price-impact quotes into `QuotedSlippage`; calibrate heuristic vs quotes and fork runs
+- [x] NLY = (payoff at maturity − entry cost − gas in/out − slippage − fees) / capital / term → APY and % per month
+- [ ] Min position size such that gas ≤ 0.3% (done: `min_position_usd`); max position size from liquidity impact (in Allocator)
+- [x] Unit + hypothesis property tests (monotonicity, decimals round-trip, conservative rounding)
 
 ### Risk Scorer and incident catalog
 - [ ] `IRiskRule` set: age & audits, TVL level and trend, par redemption path, depeg history, oracle dependency, centralized counterparties, pause/admin keys
