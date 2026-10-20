@@ -268,6 +268,17 @@ async def snapshot_chain(client: PendleClient, chain_id: int) -> list[PendleMark
     ]
 
 
+def resolve_protocol(
+    whitelist: Whitelist, name: str, chain: Chain, underlying: str, protocol_name: str
+) -> str:
+    """Yield-bearing protocol of a market: the whitelisted asset's first capped protocol, else a slug."""
+    asset = whitelist.find_asset(name, chain, underlying)
+    if asset is not None:
+        capped = [p for p in asset.protocols if not whitelist.protocols[p].cap_exempt]
+        return (capped or list(asset.protocols))[0]
+    return slugify(protocol_name) or "unknown"
+
+
 @dataclass(frozen=True, slots=True)
 class PendleNormalizer:
     """Turns snapshots on portfolio chains into :class:`Opportunity` objects."""
@@ -282,12 +293,7 @@ class PendleNormalizer:
         price = snap.pt_price_in_accounting
         if price is None or snap.accounting_usd is None or not snap.is_active:
             return None
-        asset = self.whitelist.find_asset(snap.name, chain, snap.underlying)
-        if asset is not None:
-            capped = [p for p in asset.protocols if not self.whitelist.protocols[p].cap_exempt]
-            protocol = (capped or list(asset.protocols))[0]
-        else:
-            protocol = slugify(snap.protocol_name) or "unknown"
+        protocol = resolve_protocol(self.whitelist, snap.name, chain, snap.underlying, snap.protocol_name)
         return Opportunity(
             key=f"pendle:{chain.slug}:{snap.market.lower()}",
             kind=SourceKind.PENDLE_PT,

@@ -6,7 +6,10 @@ import argparse
 import asyncio
 import sys
 from collections.abc import Sequence
+from pathlib import Path
 
+from ballast.backtest.engine import BacktestAssumptions
+from ballast.backtest.runner import render_report, run_backtests, write_report
 from ballast.chains.client import JsonRpcChainClient, RpcError, decode_result, encode_call
 from ballast.config.settings import ChainSettings, Role, settings_for_role
 from ballast.config.whitelist import load_whitelist
@@ -103,6 +106,23 @@ async def _digest(weekly: bool) -> int:
     return 0
 
 
+async def _backtest(output: str) -> int:
+    settings = settings_for_role(Role.ANALYTICS)
+    async with app_context(settings) as ctx:
+        books_result, data, window = await run_backtests(ctx)
+    text = render_report(books_result, data, window, BacktestAssumptions())
+    path = write_report(text, Path(output))
+    for b in books_result:
+        m = b.report.validation_default.metrics
+        print(
+            f"[{b.book}] validation net APY {m.net_apy:.2%} "
+            f"(after incidents {m.net_apy_after_incidents:.2%}), "
+            f"parking {m.parking_apy_avg:.2%}, locked avg {m.avg_locked_share:.1%}, verdict {b.verdict}"
+        )
+    print(f"report: {path}")
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="ballast", description="Ballast locked-yield research tool")
     parser.add_argument("--log-level", default="WARNING")
@@ -110,10 +130,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     sub.add_parser("scan", help="collect, analyze and update paper portfolios once")
     sub.add_parser("verify-whitelist", help="check pinned token addresses on-chain (symbol, decimals)")
     sub.add_parser("notify-test", help="send a test Telegram message")
+    backtest = sub.add_parser("backtest", help="out-of-sample backtest on stored Pendle history")
+    backtest.add_argument("--output", default="docs/reports")
     digest = sub.add_parser("digest", help="send the daily (or --weekly) digest now")
     digest.add_argument("--weekly", action="store_true")
     args = parser.parse_args(argv)
     configure_logging(args.log_level)
+    if args.command == "backtest":
+        return asyncio.run(_backtest(args.output))
     if args.command == "digest":
         return asyncio.run(_digest(args.weekly))
     commands = {"scan": _scan, "verify-whitelist": _verify_whitelist, "notify-test": _notify_test}
