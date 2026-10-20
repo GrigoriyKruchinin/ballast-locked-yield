@@ -1,3 +1,4 @@
+import os
 from decimal import Decimal
 
 import pytest
@@ -12,10 +13,16 @@ from ballast.config.settings import (
 )
 from ballast.domain.models import Chain
 
+ENV_PREFIXES = ("DB_", "APP_", "TELEGRAM_", "RPC_URL_", "CHAIN_", "REDIS_")
+
 
 @pytest.fixture(autouse=True)
 def _isolate_env(monkeypatch: pytest.MonkeyPatch, tmp_path: pytest.TempPathFactory) -> None:
-    monkeypatch.chdir(tmp_path)  # no .env in the temp dir
+    """Tests must not depend on the caller's environment (CI sets DB_URL_OVERRIDE) or a local .env."""
+    monkeypatch.chdir(tmp_path)
+    for name in list(os.environ):
+        if name.startswith(ENV_PREFIXES):
+            monkeypatch.delenv(name)
 
 
 def test_chain_list_parsing(monkeypatch: pytest.MonkeyPatch) -> None:
