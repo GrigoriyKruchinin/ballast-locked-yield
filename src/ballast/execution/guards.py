@@ -1,4 +1,4 @@
-"""Transaction guards shared by every executor (fork simulation now, live chain later).
+"""Transaction guards applied to every simulated transaction.
 
 A request is rejected unless: the target contract is whitelisted for the chain, any approval
 is for a whitelisted token with an exact (finite, non-zero) amount, ``minOut`` is set, the

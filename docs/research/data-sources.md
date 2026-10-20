@@ -360,7 +360,7 @@ Some pages say 500 CUPS, which conflicts with the 300 on the pricing table: assu
 2. No sub-hour Pendle history. Intra-hour implied-APY spikes are invisible to the backtest.
 3. `historical-data.ptPrice` is in USD only. Pricing in underlying units depends on our own conversion via `syPrice`, the accounting-asset price, or the SY exchange rate.
 4. **Small Pendle universe on the target chains:** 4 active markets on Arbitrum and 8 on Base today, many of them exotic (RWA, tokenized equities,
-   points tokens) and thin (often under $100k liquidity). This is a sample-size and risk problem for Stage 1.
+   points tokens) and thin (often under $100k liquidity). This is a sample-size and risk problem for the research.
 5. Pendle free rate limits (200 CU/min and 200k CU/week observed) cannot be relied on as a fixed figure. Read the headers.
 6. DefiLlama free-tier rate limits are undocumented. `/pools` is 11 MB per call, and `/chart` is daily only.
 7. Aave `apyBase` on DefiLlama is not exactly equal to the on-chain APY (it is closer to APR, plus timing lag).

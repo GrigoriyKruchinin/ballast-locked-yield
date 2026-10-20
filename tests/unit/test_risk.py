@@ -72,7 +72,7 @@ def scorer(st: MarketState | None = None, *, execution: bool = False) -> RiskSco
         state=st or state(),
         risk=risk,
         allocation=AllocationSettings(),
-        execution_mode=execution,
+        strict_addresses=execution,
     )
     return RiskScorer(rules, WL, risk)
 
@@ -101,7 +101,7 @@ def test_address_mismatch_blocked() -> None:
     assert not scorer().score(opp).allowed
 
 
-def test_unpinned_address_blocked_only_in_execution_mode() -> None:
+def test_unpinned_address_blocked_only_in_strict_mode() -> None:
     opp = replace(pt(asset="sUSDe", protocol="ethena", chain=Chain.BASE), quoted_apy=Decimal("0.06"))
     assert scorer().score(opp).allowed
     assert not scorer(execution=True).score(opp).allowed

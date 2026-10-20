@@ -1,7 +1,6 @@
-"""Stage 1 Go/No-Go report generator (data sections).
+"""Research report generator: live paper portfolios, opportunity universe, NLY, fork checks, risk premia.
 
-Produces ``docs/reports/stage-1-go-no-go.md``. The final recommendation and the plain-language
-("Простыми словами") block are written by a human/agent reviewing these numbers, not generated.
+Produces ``docs/reports/research-report.md`` from the database. Numbers only; interpretation lives in README.
 """
 
 from __future__ import annotations
@@ -194,7 +193,7 @@ def _quantiles(values: list[Decimal]) -> str:
     return f"p10 {_pct(q(0.1))} · median {_pct(Decimal(str(median(s))))} · p90 {_pct(q(0.9))} · n={len(s)}"
 
 
-async def render_go_no_go(session: AsyncSession, catalog: IncidentCatalog, books: list[str]) -> str:
+async def render_report(session: AsyncSession, catalog: IncidentCatalog, books: list[str]) -> str:
     now = datetime.now(UTC)
     live = await live_books(session, books)
     dist = await nly_distribution(session)
@@ -208,17 +207,9 @@ async def render_go_no_go(session: AsyncSession, catalog: IncidentCatalog, books
     chain_names = {int(c): c.slug for c in Chain}
 
     lines = [
-        "# Stage 1 Go/No-Go report",
+        "# Research report",
         "",
         f"_Generated {now:%Y-%m-%d %H:%M} UTC by `ballast report`. Results are estimated/historical, not promises._",
-        "",
-        "## Простыми словами",
-        "",
-        "_To be written after reviewing the numbers below (3–6 sentences, Russian)._",
-        "",
-        "## Recommendation",
-        "",
-        "_Go / Rework / No-Go: to be decided with the user after the live window (>= 4 weeks)._",
         "",
         "## Live paper portfolio",
         "",

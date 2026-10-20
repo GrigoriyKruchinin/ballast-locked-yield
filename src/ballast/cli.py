@@ -8,8 +8,8 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
-from ballast.analytics.report import render_go_no_go
-from ballast.analytics.report import write as write_go_no_go
+from ballast.analytics.report import render_report as render_research_report
+from ballast.analytics.report import write as write_research_report
 from ballast.backtest.engine import BacktestAssumptions
 from ballast.backtest.runner import render_report, run_backtests, write_report
 from ballast.chains.client import JsonRpcChainClient, RpcError, decode_result, encode_call
@@ -120,7 +120,7 @@ async def _backtest(output: str) -> int:
         print(
             f"[{b.book}] validation net APY {m.net_apy:.2%} "
             f"(after incidents {m.net_apy_after_incidents:.2%}), "
-            f"parking {m.parking_apy_avg:.2%}, locked avg {m.avg_locked_share:.1%}, verdict {b.verdict}"
+            f"parking {m.parking_apy_avg:.2%}, locked avg {m.avg_locked_share:.1%}; {b.summary}"
         )
     print(f"report: {path}")
     return 0
@@ -147,8 +147,8 @@ async def _simulate() -> int:
 async def _report(output: str) -> int:
     settings = settings_for_role(Role.ANALYTICS)
     async with app_context(settings) as ctx, ctx.sessions() as session:
-        text = await render_go_no_go(session, ctx.catalog, [b.name for b in ctx.books])
-    print(f"report: {write_go_no_go(text, Path(output))}")
+        text = await render_research_report(session, ctx.catalog, [b.name for b in ctx.books])
+    print(f"report: {write_research_report(text, Path(output))}")
     return 0
 
 
@@ -160,8 +160,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     sub.add_parser("verify-whitelist", help="check pinned token addresses on-chain (symbol, decimals)")
     sub.add_parser("notify-test", help="send a test Telegram message")
     sub.add_parser("simulate", help="fork-simulate entry/exit of current candidates on Anvil")
-    report = sub.add_parser("report", help="render the Stage 1 Go/No-Go data report")
-    report.add_argument("--output", default="docs/reports/stage-1-go-no-go.md")
+    report = sub.add_parser("report", help="render the research data report")
+    report.add_argument("--output", default="docs/reports/research-report.md")
     backtest = sub.add_parser("backtest", help="out-of-sample backtest on stored Pendle history")
     backtest.add_argument("--output", default="docs/reports")
     digest = sub.add_parser("digest", help="send the daily (or --weekly) digest now")

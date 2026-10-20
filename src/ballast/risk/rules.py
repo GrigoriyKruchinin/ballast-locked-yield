@@ -59,10 +59,10 @@ class WhitelistRule:
 
 @dataclass(frozen=True, slots=True)
 class AddressVerifiedRule:
-    """Unpinned addresses are scored in research mode and blocked in execution mode."""
+    """Unpinned addresses add risk points by default and are blocked when ``strict_addresses`` is set."""
 
     whitelist: Whitelist
-    execution_mode: bool = False
+    strict_addresses: bool = False
     name: str = "address_verified"
 
     def evaluate(self, opportunity: Opportunity) -> RiskFinding:
@@ -72,7 +72,7 @@ class AddressVerifiedRule:
         if self.whitelist.is_address_verified(asset, opportunity.chain, opportunity.asset_address):
             return _ok(self.name)
         reason = f"{asset.symbol} address on {opportunity.chain.slug} not pinned in whitelist"
-        if self.execution_mode:
+        if self.strict_addresses:
             return _block(self.name, reason)
         return RiskFinding(self.name, Decimal(5), reason)
 

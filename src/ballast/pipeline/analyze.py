@@ -72,7 +72,7 @@ class Analyzer:
     risk: RiskSettings
     allocation: AllocationSettings
     costs: CostSettings
-    execution_mode: bool = False
+    strict_addresses: bool = False
 
     def cost_model(self, inputs: AnalysisInputs) -> RoundTripCostModel:
         return RoundTripCostModel(
@@ -114,7 +114,7 @@ class Analyzer:
             state=state,
             risk=self.risk,
             allocation=self.allocation,
-            execution_mode=self.execution_mode,
+            strict_addresses=self.strict_addresses,
         )
         scorer = RiskScorer(rules, self.whitelist, self.risk)
         cost_model = self.cost_model(inputs)

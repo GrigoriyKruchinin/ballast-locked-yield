@@ -1,4 +1,4 @@
-# Stage 1 local stack: research mode, public data only, no wallets.
+# Local stack: public data only, no wallets or exchange keys.
 # Values come from .env (compose interpolation). Each service receives only the variables it needs.
 
 x-db-env: &db-env

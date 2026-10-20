@@ -9,7 +9,7 @@ from pathlib import Path
 
 from sqlalchemy import func, select
 
-from ballast.analytics.criteria import Criterion, evaluate_criteria, verdict
+from ballast.analytics.criteria import Criterion, evaluate_criteria, summary
 from ballast.backtest.data import (
     HistoricalData,
     MarketSeries,
@@ -39,7 +39,7 @@ class BookBacktest:
     book: str
     report: OutOfSampleReport
     criteria: list[Criterion]
-    verdict: str
+    summary: str
 
 
 async def load_history(ctx: AppContext) -> HistoricalData:
@@ -90,7 +90,7 @@ async def run_backtests(
     for book in ctx.books:
         report = out_of_sample(bt, start, end, book.chains)
         criteria = evaluate_criteria(report.validation_default.metrics)
-        out.append(BookBacktest(book.name, report, criteria, verdict(criteria)))
+        out.append(BookBacktest(book.name, report, criteria, summary(criteria)))
     async with session_scope(ctx.sessions) as session:
         for b in out:
             for window, result in (
@@ -182,7 +182,7 @@ def render_report(
         "- The live decision code (NLY, risk rules, allocator, paper portfolio) replays history daily.",
         "- Tier premiums are chosen on the first 60% of the window (tuning) by incident-adjusted APY;"
         " the remaining 40% (validation) is never used for tuning.",
-        "- Go/No-Go criteria use the validation window with the agreed default premiums (A 2 pp, B 6 pp).",
+        "- Benchmark targets use the validation window with the agreed default premiums (A 2 pp, B 6 pp).",
         "",
     ]
     for b in books:
@@ -197,17 +197,17 @@ def render_report(
                 + [(f"tuning {t.premiums[0]}/{t.premiums[1]}", t) for t in r.tuning]
             ),
             "",
-            "### Criteria (validation, default premiums)",
+            "### Benchmark targets (validation, default premiums)",
             "",
-            "| Criterion | Value | Threshold | Result |",
+            "| Target | Value | Threshold | Result |",
             "|---|---|---|---|",
             *[
-                f"| {c.name}{' (mandatory)' if c.mandatory else ''} | {c.value} | {c.threshold} | "
+                f"| {c.name}{' (primary)' if c.mandatory else ''} | {c.value} | {c.threshold} | "
                 f"{'n/a' if c.passed is None else ('pass' if c.passed else 'FAIL')} |"
                 for c in b.criteria
             ],
             "",
-            f"Backtest-only verdict: **{b.verdict}** (final verdict needs live collection and fork checks).",
+            f"Targets: **{b.summary}**.",
             "",
             _closeness(r.validation_default),
             "",

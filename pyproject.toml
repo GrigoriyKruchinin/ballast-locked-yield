@@ -1,7 +1,7 @@
 [project]
 name = "ballast"
-version = "0.1.0.dev0"
-description = "Locked-yield router for stablecoin capital: NLY scanner, risk scoring, fork simulation, paper portfolio."
+version = "1.0.0"
+description = "DeFi locked-yield analytics toolkit: NLY scanner, risk scoring, fork simulation, backtest, paper portfolio."
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 license = { text = "Proprietary" }

@@ -1,4 +1,4 @@
-"""Go/No-Go criteria (docs/decisions.md) evaluated on validation metrics."""
+"""Benchmark targets (docs/decisions.md) evaluated on out-of-sample metrics."""
 
 from __future__ import annotations
 
@@ -75,14 +75,12 @@ def evaluate_criteria(m: BacktestMetrics, *, fork_within_tolerance: bool | None 
     ]
 
 
-def verdict(criteria: list[Criterion]) -> str:
-    mandatory_failed = any(c.mandatory and c.passed is False for c in criteria)
-    failed = [c for c in criteria if c.passed is False]
-    unknown = [c for c in criteria if c.passed is None]
-    if mandatory_failed:
-        return "No-Go"
-    if not failed and not unknown:
-        return "Go"
-    if len(failed) <= 1:
-        return "Rework"
-    return "No-Go"
+def summary(criteria: list[Criterion]) -> str:
+    """Neutral one-line summary: how many measurable targets were met, and the yield target status."""
+    measurable = [c for c in criteria if c.passed is not None]
+    met = sum(1 for c in measurable if c.passed)
+    mandatory = next((c for c in criteria if c.mandatory), None)
+    yield_status = (
+        "n/a" if mandatory is None or mandatory.passed is None else ("met" if mandatory.passed else "not met")
+    )
+    return f"{met} of {len(measurable)} measurable targets met; yield target {yield_status}"

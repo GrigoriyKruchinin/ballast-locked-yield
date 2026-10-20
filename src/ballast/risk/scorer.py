@@ -92,11 +92,11 @@ def default_rules(
     state: MarketState,
     risk: RiskSettings,
     allocation: AllocationSettings,
-    execution_mode: bool = False,
+    strict_addresses: bool = False,
 ) -> list[IRiskRule]:
     return [
         WhitelistRule(whitelist),
-        AddressVerifiedRule(whitelist, execution_mode=execution_mode),
+        AddressVerifiedRule(whitelist, strict_addresses=strict_addresses),
         MaturityRule(allocation.min_maturity_days, allocation.max_maturity_days),
         ProtocolMaturityRule(whitelist, state.as_of),
         CounterpartyRule(whitelist),

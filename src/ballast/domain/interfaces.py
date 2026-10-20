@@ -74,7 +74,7 @@ class IAllocator(Protocol):
 
 @runtime_checkable
 class ITxExecutor(Protocol):
-    """Executes a transaction: historical simulator, Anvil fork or live chain."""
+    """Executes a transaction in a simulated environment (e.g. an Anvil fork)."""
 
     @property
     def name(self) -> str: ...

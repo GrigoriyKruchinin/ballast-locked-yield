@@ -1,7 +1,7 @@
 # Asset and protocol whitelist (agreed in docs/decisions.md, 2026-10-20).
 # Anything not listed here is rejected. Tier C is never allowed.
 # Addresses are checked against chain data (`make verify-whitelist`). Assets without a pinned
-# address on a chain can be observed and scored in research mode but are never executable there.
+# address on a chain are scored with extra risk points (and blocked with strict address checks).
 
 protocols:
   pendle:
