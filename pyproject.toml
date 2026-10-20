@@ -1,0 +1,92 @@
+[project]
+name = "ballast"
+version = "1.0.0"
+description = "DeFi locked-yield analytics toolkit: NLY scanner, risk scoring, fork simulation, backtest, paper portfolio."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "Proprietary" }
+dependencies = [
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "sqlalchemy[asyncio]>=2.0.36",
+    "asyncpg>=0.30",
+    "alembic>=1.14",
+    "celery[redis]>=5.4",
+    "redis>=5.2",
+    "httpx>=0.28",
+    "web3>=7.6",
+    "pyyaml>=6.0.2",
+    "structlog>=24.4",
+    "tenacity>=9.0",
+    "pandas>=2.2",
+    "numpy>=2.1",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "pytest-cov>=6.0",
+    "hypothesis>=6.122",
+    "respx>=0.22",
+    "aiosqlite>=0.20",
+    "types-PyYAML>=6.0",
+    "pandas-stubs>=2.2",
+    "celery-types>=0.22",
+]
+
+[project.scripts]
+ballast = "ballast.cli:main"
+
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ballast"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "A", "C4", "SIM", "RET", "PTH", "RUF", "S", "DTZ", "ASYNC", "PL", "TID", "ANN"]
+ignore = [
+    "PLR0913",  # many args are fine for factories / dataclasses
+    "PLR2004",  # magic values are fine in tests and config defaults
+    "S101",     # assert used in tests
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "ANN", "PLR", "DTZ", "RUF001"]
+"src/ballast/notify/**" = ["RUF001"]  # user-facing Russian text by design
+"src/ballast/analytics/report.py" = ["E501", "RUF001"]  # markdown table templates
+"migrations/**" = ["ANN", "N999"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+mypy_path = "src"
+packages = ["ballast"]
+plugins = ["pydantic.mypy"]
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = ["web3.*", "eth_abi.*", "eth_account.*", "eth_typing.*", "hexbytes.*"]
+follow_imports = "normal"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = "-q --strict-markers"
+markers = [
+    "integration: needs docker services or network (deselect with -m 'not integration')",
+    "fork: needs anvil + RPC",
+]

@@ -1,0 +1,161 @@
+# Asset and protocol whitelist (agreed in docs/decisions.md, 2026-10-20).
+# Anything not listed here is rejected. Tier C is never allowed.
+# Addresses are checked against chain data (`make verify-whitelist`). Assets without a pinned
+# address on a chain are scored with extra risk points (and blocked with strict address checks).
+
+protocols:
+  pendle:
+    llama_slug: pendle
+    kind: venue
+    launched: 2021-06
+    audits: 6
+    admin_pause: true
+    upgradeable: true
+    centralized_counterparty: false
+    oracle_dependency: low
+    notes: Fixed-rate PT/YT AMM. Penpie (third-party) exploit Sep 2024 did not affect Pendle core.
+  aave-v3:
+    llama_slug: aave-v3
+    kind: lending
+    launched: 2022-03
+    audits: 10
+    admin_pause: true
+    upgradeable: true
+    centralized_counterparty: false
+    oracle_dependency: high
+    notes: Parking venue; also issuer of aTokens used as PT underlyings.
+  compound-v3:
+    llama_slug: compound-v3
+    kind: lending
+    launched: 2022-08
+    audits: 6
+    admin_pause: true
+    upgradeable: true
+    centralized_counterparty: false
+    oracle_dependency: high
+    notes: Parking venue (Comet USDC markets).
+  circle:
+    kind: issuer
+    cap_exempt: true
+    launched: 2018-09
+    audits: 0
+    admin_pause: true
+    upgradeable: true
+    centralized_counterparty: true
+    oracle_dependency: none
+    notes: USDC issuer; fiat-backed, can freeze addresses. Depeg Mar 2023 (SVB).
+  tether:
+    kind: issuer
+    cap_exempt: true
+    launched: 2014-10
+    audits: 0
+    admin_pause: true
+    upgradeable: true
+    centralized_counterparty: true
+    oracle_dependency: none
+    notes: USDT issuer; attestations, not full audits; can freeze addresses.
+  sky:
+    llama_slug: sky-lending
+    kind: issuer
+    launched: 2017-12
+    audits: 10
+    admin_pause: true
+    upgradeable: false
+    centralized_counterparty: true
+    oracle_dependency: high
+    notes: DAI/USDS (ex-MakerDAO); large RWA/USDC backing.
+  ethena:
+    llama_slug: ethena-usde
+    kind: issuer
+    launched: 2024-02
+    audits: 5
+    admin_pause: true
+    upgradeable: true
+    centralized_counterparty: true
+    oracle_dependency: medium
+    notes: USDe synthetic dollar (delta-neutral perp hedge, CEX custody via off-exchange settlement). Peg dip to ~0.65 on Binance on 2025-10-10 while on-chain redemption held.
+
+assets:
+  - symbol: USDC
+    tier: A
+    protocols: [circle]
+    par_redemption: true
+    addresses:
+      ethereum: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+      arbitrum: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
+      base: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+  - symbol: USDT
+    aliases: [USDT0]
+    tier: A
+    protocols: [tether]
+    par_redemption: true
+    addresses:
+      ethereum: "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+      arbitrum: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9"
+  - symbol: DAI
+    tier: A
+    protocols: [sky]
+    par_redemption: true
+    addresses:
+      ethereum: "0x6B175474E89094C44Da98b954EedeAC495271d0F"
+      arbitrum: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1"
+      base: "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb"
+  - symbol: USDS
+    tier: A
+    protocols: [sky]
+    par_redemption: true
+    addresses:
+      ethereum: "0xdC035D45d973E3EC169d2276DDab16f1e407384F"
+      arbitrum: "0x6491c05A82219b8D1479057361ff1654749b876b"
+  - symbol: sUSDS
+    peg_asset: USDS
+    tier: A
+    protocols: [sky]
+    par_redemption: true
+    yield_bearing: true
+    addresses:
+      ethereum: "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD"
+  - symbol: aUSDC
+    peg_asset: USDC
+    aliases: [aArbUSDCn, aBasUSDC]
+    tier: A
+    protocols: [aave-v3, circle]
+    par_redemption: true
+    yield_bearing: true
+    addresses: {}
+  - symbol: aUSDT
+    peg_asset: USDT
+    aliases: [aArbUSDT]
+    tier: A
+    protocols: [aave-v3, tether]
+    par_redemption: true
+    yield_bearing: true
+    addresses: {}
+  - symbol: USDe
+    tier: B
+    protocols: [ethena]
+    par_redemption: false   # mint/redeem only for whitelisted KYC entities
+    addresses:
+      ethereum: "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3"
+  - symbol: sUSDe
+    peg_asset: USDe
+    tier: B
+    protocols: [ethena]
+    par_redemption: false
+    yield_bearing: true
+    addresses:
+      ethereum: "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+
+parking:
+  - protocol: aave-v3
+    asset: USDC
+    chains: [ethereum, arbitrum, base]
+  - protocol: aave-v3
+    asset: USDT
+    chains: [ethereum, arbitrum]
+  - protocol: compound-v3
+    asset: USDC
+    chains: [ethereum, arbitrum, base]
+  - protocol: sky
+    asset: USDS   # deposit USDS into the Sky Savings Rate (sUSDS); redeemable any time
+    chains: [ethereum, arbitrum]
