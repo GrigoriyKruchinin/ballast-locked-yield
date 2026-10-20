@@ -10,11 +10,11 @@
 
 ## Шаг 1. Бесплатный RPC-ключ Alchemy
 
-RPC (точка доступа к блокчейну) нужна, чтобы программа читала данные из сетей Arbitrum и Base и делала их локальную копию для проверки сделок.
+RPC (точка доступа к блокчейну) нужна, чтобы программа читала данные из сетей Ethereum, Arbitrum и Base и делала их локальную копию для проверки сделок.
 
 - [ ] 1.1. Зайдите на https://www.alchemy.com и зарегистрируйтесь (бесплатный тариф **Free**, банковская карта не нужна).
 - [ ] 1.2. Создайте приложение (**Create new app**), назовите его, например, `ballast`.
-- [ ] 1.3. В списке сетей включите **Arbitrum Mainnet** и **Base Mainnet**.
+- [ ] 1.3. В списке сетей (**Networks**) включите **Ethereum Mainnet**, **Arbitrum Mainnet** и **Base Mainnet**.
 - [ ] 1.4. Откройте приложение и скопируйте **API Key** (строка из букв и цифр).
 - [ ] 1.5. Сохраните ключ пока у себя. В шаге 3 мы вставим его в `.env`.
 
@@ -48,6 +48,7 @@ RPC (точка доступа к блокчейну) нужна, чтобы п�
   cp .env.example .env
   ```
 - [ ] 3.2. Откройте `.env` в редакторе и заполните:
+  - `RPC_URL_ETHEREUM=https://eth-mainnet.g.alchemy.com/v2/ВАШ_КЛЮЧ_ALCHEMY`
   - `RPC_URL_ARBITRUM=https://arb-mainnet.g.alchemy.com/v2/ВАШ_КЛЮЧ_ALCHEMY`
   - `RPC_URL_BASE=https://base-mainnet.g.alchemy.com/v2/ВАШ_КЛЮЧ_ALCHEMY`
   - `TELEGRAM_BOT_TOKEN=токен из шага 2.3`

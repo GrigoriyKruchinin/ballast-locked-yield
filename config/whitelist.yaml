@@ -74,33 +74,41 @@ assets:
     protocols: [circle]
     par_redemption: true
     addresses:
+      ethereum: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
       arbitrum: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
       base: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
   - symbol: USDT
+    aliases: [USDT0]
     tier: A
     protocols: [tether]
     par_redemption: true
     addresses:
+      ethereum: "0xdAC17F958D2ee523a2206206994597C13D831ec7"
       arbitrum: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9"
   - symbol: DAI
     tier: A
     protocols: [sky]
     par_redemption: true
     addresses:
+      ethereum: "0x6B175474E89094C44Da98b954EedeAC495271d0F"
       arbitrum: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1"
       base: "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb"
   - symbol: USDS
     tier: A
     protocols: [sky]
     par_redemption: true
-    addresses: {}
+    addresses:
+      ethereum: "0xdC035D45d973E3EC169d2276DDab16f1e407384F"
   - symbol: sUSDS
+    peg_asset: USDS
     tier: A
     protocols: [sky]
     par_redemption: true
     yield_bearing: true
-    addresses: {}
+    addresses:
+      ethereum: "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD"
   - symbol: aUSDC
+    peg_asset: USDC
     aliases: [aArbUSDCn, aBasUSDC]
     tier: A
     protocols: [aave-v3, circle]
@@ -108,6 +116,7 @@ assets:
     yield_bearing: true
     addresses: {}
   - symbol: aUSDT
+    peg_asset: USDT
     aliases: [aArbUSDT]
     tier: A
     protocols: [aave-v3, tether]
@@ -118,21 +127,24 @@ assets:
     tier: B
     protocols: [ethena]
     par_redemption: false   # mint/redeem only for whitelisted KYC entities
-    addresses: {}
+    addresses:
+      ethereum: "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3"
   - symbol: sUSDe
+    peg_asset: USDe
     tier: B
     protocols: [ethena]
     par_redemption: false
     yield_bearing: true
-    addresses: {}
+    addresses:
+      ethereum: "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
 
 parking:
   - protocol: aave-v3
     asset: USDC
-    chains: [arbitrum, base]
+    chains: [ethereum, arbitrum, base]
   - protocol: aave-v3
     asset: USDT
-    chains: [arbitrum]
+    chains: [ethereum, arbitrum]
   - protocol: compound-v3
     asset: USDC
-    chains: [arbitrum, base]
+    chains: [ethereum, arbitrum, base]

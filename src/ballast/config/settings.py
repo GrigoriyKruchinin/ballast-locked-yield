@@ -66,7 +66,8 @@ class RedisSettings(BaseSettings):
 class ChainSettings(BaseSettings):
     model_config = _cfg()
 
-    chain_enabled: Annotated[tuple[Chain, ...], NoDecode] = (Chain.ARBITRUM, Chain.BASE)
+    chain_enabled: Annotated[tuple[Chain, ...], NoDecode] = (Chain.ETHEREUM, Chain.ARBITRUM, Chain.BASE)
+    rpc_url_ethereum: SecretStr = SecretStr("")
     rpc_url_arbitrum: SecretStr = SecretStr("")
     rpc_url_base: SecretStr = SecretStr("")
     rpc_timeout_seconds: float = 20.0
@@ -79,7 +80,11 @@ class ChainSettings(BaseSettings):
         return value
 
     def rpc_url(self, chain: Chain) -> SecretStr:
-        urls = {Chain.ARBITRUM: self.rpc_url_arbitrum, Chain.BASE: self.rpc_url_base}
+        urls = {
+            Chain.ETHEREUM: self.rpc_url_ethereum,
+            Chain.ARBITRUM: self.rpc_url_arbitrum,
+            Chain.BASE: self.rpc_url_base,
+        }
         return urls[chain]
 
 

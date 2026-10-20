@@ -14,6 +14,7 @@ from enum import IntEnum, StrEnum
 class Chain(IntEnum):
     """Supported chains, valued by chain id."""
 
+    ETHEREUM = 1
     ARBITRUM = 42161
     BASE = 8453
 

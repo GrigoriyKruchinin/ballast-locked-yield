@@ -51,3 +51,15 @@ Thresholds tuned on a data window must be re-validated on data not used for tuni
 - No wallets needed in Stage 1. The user will get a hardware wallet before Stage 2; the hot wallet is created in Stage 2.
 - RPC: Alchemy free tier. VPS (Stage 2): ~5–7 USD/month (Hetzner CX22 class).
 - Dashboard admin credentials: Stage 3, placeholders until then.
+
+## 2026-10-20: Ethereum added to scanning
+
+Data-source research (`docs/research/data-sources.md`) found 0 whitelisted Pendle markets on Arbitrum (4 active, all USDai/sUSDai)
+and Base (8 active, exotic: tokenized stocks, RWA, points). Ethereum has 52 active markets incl. sUSDe and sUSDS.
+User decision: **add Ethereum** to scanning, paper portfolio and Go criteria. Minimum position per chain is derived from live gas
+(entry + exit gas ≤ 0.3% of position). The Go/No-Go report shows results for "L2 only" and "with Ethereum" separately.
+
+### Interpretations (defaults, adjustable)
+- The 35% per-protocol cap applies to the *yield-bearing* protocol/issuer (Ethena, Sky, Aave, Circle...), also to parking.
+  Pendle as a venue has its own cap `MAX_VENUE_PCT` = 70%; otherwise 70% deployment would be impossible by construction.
+- The scanner records **all** stablecoin markets (for the research report); only whitelisted assets can enter the paper portfolio.
