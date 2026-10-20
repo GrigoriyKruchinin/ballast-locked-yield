@@ -32,6 +32,7 @@ class ProtocolInfo(BaseModel):
     # Issuers of the unit of account (USDC/USDT) are exempt from per-protocol caps:
     # capital is denominated in them, so capping them would cap holding cash itself.
     cap_exempt: bool = False
+    llama_slug: str | None = None  # DefiLlama protocol slug for TVL
     notes: str = ""
 
 

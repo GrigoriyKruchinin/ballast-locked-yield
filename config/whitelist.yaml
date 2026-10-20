@@ -5,6 +5,7 @@
 
 protocols:
   pendle:
+    llama_slug: pendle
     kind: venue
     launched: 2021-06
     audits: 6
@@ -14,6 +15,7 @@ protocols:
     oracle_dependency: low
     notes: Fixed-rate PT/YT AMM. Penpie (third-party) exploit Sep 2024 did not affect Pendle core.
   aave-v3:
+    llama_slug: aave-v3
     kind: lending
     launched: 2022-03
     audits: 10
@@ -23,6 +25,7 @@ protocols:
     oracle_dependency: high
     notes: Parking venue; also issuer of aTokens used as PT underlyings.
   compound-v3:
+    llama_slug: compound-v3
     kind: lending
     launched: 2022-08
     audits: 6
@@ -52,6 +55,7 @@ protocols:
     oracle_dependency: none
     notes: USDT issuer; attestations, not full audits; can freeze addresses.
   sky:
+    llama_slug: sky-lending
     kind: issuer
     launched: 2017-12
     audits: 10
@@ -61,6 +65,7 @@ protocols:
     oracle_dependency: high
     notes: DAI/USDS (ex-MakerDAO); large RWA/USDC backing.
   ethena:
+    llama_slug: ethena-usde
     kind: issuer
     launched: 2024-02
     audits: 5
