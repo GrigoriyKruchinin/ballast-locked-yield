@@ -108,7 +108,8 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 
 ### Research and report
 - [ ] ≥ 4 weeks of live collection (started 2026-10-20 18:13 UTC; earliest report date 2026-11-17)
-- [ ] Run `run-backtest` (out-of-sample) and `audit-risks`
+- [x] First out-of-sample backtest run (`docs/reports/backtest-2026-10-20.md`): 0 entries in validation; backtest-only verdict No-Go
+- [ ] Re-run backtest at the end of live collection; run `audit-risks`
 - [x] Go/No-Go data report generator (`ballast report`): live books, universe, NLY distribution, weekly opportunities, fork checks, tier premium vs incident loss
 - [ ] `docs/reports/stage-1-go-no-go.md`: metrics, NLY distribution, weekly opportunities, parking comparison, fork checks, incident catalog, risk assessment, recommendation, "Простыми словами" block
 - [ ] Go/No-Go criteria evaluated:

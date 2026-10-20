@@ -185,23 +185,27 @@ async def load_parking_series(yields: DefiLlamaYields, chains: Sequence[Chain]) 
     return out
 
 
+CHART_MAX_POINTS = 400  # DefiLlama coins /chart allows at most 500 points per request
+
+
 async def load_eth_usd(coins: JsonHttpClient, start: datetime, days: int) -> DailySeries:
-    body = await coins.get(
-        "/chart/coingecko:ethereum", {"start": int(start.timestamp()), "span": days, "period": "1d"}
-    )
-    series = (
-        body.get("coins", {}).get("coingecko:ethereum", {}).get("prices", [])
-        if isinstance(body, dict)
-        else []
-    )
-    times: list[datetime] = []
-    values: list[Decimal] = []
-    for row in series:
-        ts, price = from_unix(row.get("timestamp")), dec(row.get("price"))
-        if ts is not None and price is not None:
-            times.append(ts)
-            values.append(price)
-    return DailySeries(tuple(times), tuple(values))
+    points: dict[datetime, Decimal] = {}
+    cursor = start
+    remaining = days
+    while remaining > 0:
+        span = min(remaining, CHART_MAX_POINTS)
+        body = await coins.get(
+            "/chart/coingecko:ethereum", {"start": int(cursor.timestamp()), "span": span, "period": "1d"}
+        )
+        coin = body.get("coins", {}).get("coingecko:ethereum", {}) if isinstance(body, dict) else {}
+        for row in coin.get("prices", []):
+            ts, price = from_unix(row.get("timestamp")), dec(row.get("price"))
+            if ts is not None and price is not None:
+                points[ts] = price
+        cursor += timedelta(days=span)
+        remaining -= span
+    ordered = sorted(points.items())
+    return DailySeries(tuple(t for t, _ in ordered), tuple(v for _, v in ordered))
 
 
 def coverage_gaps(markets: Sequence[MarketSeries], whitelist: Whitelist) -> list[str]:

@@ -125,6 +125,8 @@ class PaperEngine:
     evaluate: Evaluate
     parking_exit_cost: Callable[[Chain], Decimal]
     rebalance_band: Decimal = Decimal("0.05")
+    # Stay in a held parking venue unless a target of the same protocol pays this much more (no churn).
+    parking_rate_band: Decimal = Decimal("0.005")
     min_move_usd: Decimal = Decimal(200)
 
     def accrue_and_mature(
@@ -229,8 +231,39 @@ class PaperEngine:
             need -= take
         return amount - max(need, ZERO), costs
 
+    def _sticky_targets(self, state: PaperState, plan: AllocationPlan) -> dict[str, Allocation]:
+        """Replace a target by an already-held venue of the same protocol when the rate gain is small."""
+        targets: dict[str, Allocation] = {}
+        held = dict(state.parking)
+        for alloc in (a for a in plan.allocations if a.kind is SourceKind.PARKING):
+            if alloc.opportunity_key in held:
+                targets[alloc.opportunity_key] = alloc
+                held.pop(alloc.opportunity_key)
+                continue
+            protocols = {e for e in alloc.exposures if e.startswith("protocol:")}
+            substitute = next(
+                (
+                    bal
+                    for bal in held.values()
+                    if protocols & set(bal.exposures)
+                    and alloc.expected_apy - bal.apy < self.parking_rate_band
+                ),
+                None,
+            )
+            if substitute is None:
+                targets[alloc.opportunity_key] = alloc
+                continue
+            held.pop(substitute.key)
+            targets[substitute.key] = replace(
+                alloc,
+                opportunity_key=substitute.key,
+                exposures=substitute.exposures,
+                expected_apy=substitute.apy,
+            )
+        return targets
+
     def _rebalance_parking(self, state: PaperState, plan: AllocationPlan) -> tuple[int, Decimal]:
-        targets = {a.opportunity_key: a for a in plan.allocations if a.kind is SourceKind.PARKING}
+        targets = self._sticky_targets(state, plan)
         moves = 0
         costs = ZERO
         total_parking_target = sum((a.capital_usd for a in targets.values()), ZERO)

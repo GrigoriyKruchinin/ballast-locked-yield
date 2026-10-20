@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 
@@ -101,6 +101,9 @@ class BacktestMetrics:
     incident_loss_apy: Decimal
     net_apy_after_incidents: Decimal
     positions_opened: int
+    days_with_allowed_candidate: int = 0
+    median_best_excess_pp: Decimal | None = None
+    max_best_excess_pp: Decimal | None = None
 
     @property
     def weeks_deployed_share(self) -> Decimal:
@@ -141,6 +144,7 @@ class Backtester:
         state = PaperState.new(label, self.allocation.paper_capital_usd, start)
         records: list[DayRecord] = []
         opened: list[str] = []
+        best_excess: list[Decimal] = []
         at = start
         while at <= end:
             gas = self._gas(at, chains)
@@ -160,12 +164,23 @@ class Backtester:
                 chains=chains,
                 existing=state.existing_allocations(),
             )
+            allowed = [c.excess_apy for c in analysis.candidates if c.risk.allowed]
+            if allowed:
+                best_excess.append(max(allowed))
             by_key = {c.opportunity.key: c.opportunity for c in analysis.candidates}
             new, _, _ = engine.apply_plan(state, analysis.plan, by_key, at)
             opened += [p.key for p in new]
             records.append(self._record(state, at, analysis.parking_apy))
             at += self.assumptions.step
         metrics = self._metrics(state, records, len(opened))
+        if best_excess:
+            ordered = sorted(best_excess)
+            metrics = replace(
+                metrics,
+                days_with_allowed_candidate=len(best_excess),
+                median_best_excess_pp=ordered[len(ordered) // 2] * 100,
+                max_best_excess_pp=ordered[-1] * 100,
+            )
         return BacktestResult(
             label, start, end, premiums, tuple(chains), metrics, tuple(records), tuple(opened)
         )

@@ -119,6 +119,18 @@ def _row(book: str, window: str, r: BacktestResult) -> BacktestRunRow:
     )
 
 
+def _closeness(r: BacktestResult) -> str:
+    m = r.metrics
+    if not m.days_with_allowed_candidate:
+        return "No risk-allowed whitelisted candidate existed on any day of the validation window."
+    decision_days = len(r.records)
+    return (
+        f"Risk-allowed candidates existed on {m.days_with_allowed_candidate} of {decision_days} decision days. "
+        f"Best NLY minus entry threshold: median {m.median_best_excess_pp:.2f} pp, "
+        f"best day {m.max_best_excess_pp:.2f} pp (positive would mean an entry)."
+    )
+
+
 def _pct(v: Decimal | None, digits: int = 2) -> str:
     return "n/a" if v is None else f"{v * 100:.{digits}f}%"
 
@@ -195,6 +207,8 @@ def render_report(
             ],
             "",
             f"Backtest-only verdict: **{b.verdict}** (final verdict needs live collection and fork checks).",
+            "",
+            _closeness(r.validation_default),
             "",
             "Entered markets (validation, default): "
             + (", ".join(sorted(set(r.validation_default.opened))) or "none"),

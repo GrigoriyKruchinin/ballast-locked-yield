@@ -153,3 +153,21 @@ async def test_state_roundtrip() -> None:
         assert again.locked == []
         assert len(await closed_positions(s, "all")) == 1
     await db.dispose()
+
+
+def test_parking_is_sticky_within_rate_band() -> None:
+    state = PaperState.new("all", Decimal(10_000), NOW)
+    eng = engine()
+    a = Allocation(
+        PARK_KEY, Decimal(3500), SourceKind.PARKING, frozenset({"protocol:aave-v3"}), Decimal("0.040"), None
+    )
+    eng.apply_plan(state, plan(a), {}, NOW)
+    other = "parking:aave-v3:ethereum:USDC:cc"
+    slightly_better = replace(a, opportunity_key=other, expected_apy=Decimal("0.043"))
+    _, moves, _ = eng.apply_plan(state, plan(slightly_better), {}, NOW)
+    assert moves == 0
+    assert set(state.parking) == {PARK_KEY}
+    much_better = replace(a, opportunity_key=other, expected_apy=Decimal("0.050"))
+    _, moves, _ = eng.apply_plan(state, plan(much_better), {}, NOW)
+    assert moves == 2  # withdraw + deposit
+    assert set(state.parking) == {other}
