@@ -257,6 +257,8 @@ class PaperPositionRow(Base):
     entry_price: Mapped[Decimal]
     units: Mapped[Decimal]
     expected_apy: Mapped[Decimal]
+    payoff_per_unit: Mapped[Decimal | None]
+    expected_payoff_usd: Mapped[Decimal | None]
     entry_costs_usd: Mapped[Decimal]
     expected_exit_costs_usd: Mapped[Decimal]
     exposures: Mapped[list[str]]
@@ -265,6 +267,18 @@ class PaperPositionRow(Base):
     closed_at: Mapped[datetime | None]
     payoff_usd: Mapped[Decimal | None]
     close_reason: Mapped[str | None] = mapped_column(Text)
+
+
+class PaperAccountRow(Base):
+    __tablename__ = "paper_accounts"
+
+    name: Mapped[str] = mapped_column(String(32), primary_key=True)
+    initial_capital_usd: Mapped[Decimal]
+    started_at: Mapped[datetime]
+    updated_at: Mapped[datetime]
+    idle_usd: Mapped[Decimal]
+    costs_paid_usd: Mapped[Decimal]
+    chains: Mapped[list[str]]
 
 
 class PaperDailyRow(Base):

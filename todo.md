@@ -86,9 +86,9 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 - [ ] Compare simulated result vs model; tolerance 0.3%; store results
 
 ### Paper Portfolio
-- [ ] Virtual 10,000 USD portfolio on live data incl. gas and slippage
-- [ ] Daily snapshot: positions, accrued yield, parking balance, upcoming maturities
-- [ ] Maturity handling: redeem at par → back to parking → reallocate
+- [x] Virtual 10,000 USD portfolio engine incl. gas and slippage (value-conservation property test); two books: `all` and `l2`
+- [ ] Daily snapshot: positions, accrued yield, parking balance, upcoming maturities (storage done; scheduling pending)
+- [x] Maturity handling: redeem at par (peg-capped) → idle → reallocate
 
 ### Monitoring (research mode)
 - [ ] Monitors: peg deviation, TVL drop, contract pause, rate spike, oracle status → events in DB + alerts
