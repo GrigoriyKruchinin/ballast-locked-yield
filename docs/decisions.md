@@ -79,3 +79,11 @@ Ethereum, Arbitrum, Base only**. Young chains can be reconsidered at the post-St
 - Added Sky Savings Rate (deposit USDS, receive sUSDS; redeemable any time) on Ethereum and Arbitrum as a third Tier A
   parking venue, so the 35% per-protocol cap does not leave capital idle.
 - Benchmark parking rate for thresholds and the "parking + 3 pp" criterion = best whitelisted parking rate (conservative).
+
+## 2026-10-20: Cost model calibration (live Pendle quotes, Ethereum sUSDe/sUSDS, 1k and 5k USD)
+
+Quotes: price impact 0.011-0.012%, Pendle fee ~0.01% of notional for 37 days, `gasUsed` 264k-493k.
+- Entry gas 900k -> **450k** units, exit gas 700k -> **350k** (upper end of quotes + approval).
+- Pendle venue fee = market `feeRate` x days / 365 (matched the quoted fee); 10 bps only when `feeRate` is missing.
+- Swap legs for non-USDC underlyings stay at 5 bps each; heuristic slippage stays conservative when no quote exists.
+  The fork simulation is the final check of all three.

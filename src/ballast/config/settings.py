@@ -107,8 +107,9 @@ class CostSettings(BaseSettings):
     # Fallbacks used only when a live quote is unavailable; conservative on purpose.
     default_slippage_bps: Decimal = Decimal(10)
     default_swap_fee_bps: Decimal = Decimal(5)
-    entry_gas_units: int = 900_000
-    exit_gas_units: int = 700_000
+    # Calibrated 2026-10-20 on Pendle convert quotes (gasUsed 264k-493k) + approve; docs/decisions.md.
+    entry_gas_units: int = 450_000
+    exit_gas_units: int = 350_000
 
     @property
     def max_gas_frac(self) -> Decimal:

@@ -109,8 +109,7 @@ class RoundTripCostModel:
         with localcontext(money_context()):
             needs_swap = opportunity.asset_symbol.upper() not in BASE_STABLES
             legs = Decimal(2) if needs_swap else ZERO
-            venue_bps = self.venue_fee_bps.get(opportunity.kind, ZERO)
-            fees = capital_usd * (self.swap_fee_bps * legs + venue_bps) / BPS
+            fees = capital_usd * (self.swap_fee_bps * legs + self._venue_fee_bps(opportunity)) / BPS
             slip_entry = capital_usd * self.slippage.slippage_frac(opportunity, capital_usd)
             slip_exit = capital_usd * self.exit_swap_slippage_bps / BPS if needs_swap else ZERO
             is_parking = opportunity.kind is SourceKind.PARKING
@@ -123,6 +122,19 @@ class RoundTripCostModel:
                 slippage_entry_usd=round_up(slip_entry),
                 slippage_exit_usd=round_up(slip_exit),
             )
+
+    def _venue_fee_bps(self, opportunity: Opportunity) -> Decimal:
+        """Pendle charges ``feeRate`` in implied-rate terms: price cost ~= feeRate * days / 365."""
+        fallback = self.venue_fee_bps.get(opportunity.kind, ZERO)
+        raw = opportunity.extra.get("fee_rate")
+        days = opportunity.days_to_maturity()
+        if opportunity.kind is not SourceKind.PENDLE_PT or raw is None or days is None or days <= 0:
+            return fallback
+        try:
+            fee_rate = Decimal(raw)
+        except ArithmeticError:
+            return fallback
+        return max(fee_rate, ZERO) * days / Decimal(365) * BPS
 
     def min_position_usd(self, chain: Chain, max_gas_frac: Decimal) -> Decimal:
         """Smallest position whose entry + exit gas is within ``max_gas_frac`` of size."""

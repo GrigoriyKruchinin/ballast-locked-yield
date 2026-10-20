@@ -61,7 +61,7 @@ def test_long_attractive_pt_enters() -> None:
     enters = [d for d in res.plan.decisions if d.action is DecisionAction.ENTER]
     assert len(enters) == 1
     assert enters[0].capital_usd == Decimal(3500)  # sky protocol cap
-    assert res.min_positions[Chain.ETHEREUM] > Decimal(1000)
+    assert res.min_positions[Chain.ETHEREUM] > Decimal(500)  # 800k gas at 1 gwei, 2500 USD/ETH
 
 
 def test_short_pt_skipped_by_costs() -> None:

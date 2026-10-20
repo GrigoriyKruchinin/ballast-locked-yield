@@ -7,7 +7,7 @@ import pytest
 
 from ballast.domain.models import Candidate, MonitorEvent, RiskScore, Severity, Tier
 from ballast.nly.calculator import NlyCalculator
-from ballast.notify.formatting import format_daily, format_events, format_opportunities
+from ballast.notify.formatting import OpportunityView, format_daily, format_events, format_opportunities
 from ballast.notify.telegram import TelegramClient, TelegramError, split_message
 from ballast.pipeline.run import BookSummary
 from tests.factories import NOW, ZERO_COSTS, FixedCostModel, pt
@@ -54,7 +54,7 @@ def candidate() -> Candidate:
 
 
 def test_opportunities_escaped_and_explained() -> None:
-    text = format_opportunities([candidate()], Decimal("0.05"))
+    text = format_opportunities([OpportunityView.from_candidate(candidate())], Decimal("0.05"))
     assert "&lt;script&gt;" in text
     assert "<script>" not in text
     assert "NLY" in text

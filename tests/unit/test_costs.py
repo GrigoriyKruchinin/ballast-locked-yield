@@ -1,3 +1,4 @@
+from dataclasses import replace
 from decimal import Decimal
 
 import pytest
@@ -90,3 +91,11 @@ def test_parking_uses_lending_gas_units() -> None:
     # 250k gas * 1e7 wei * 3000 / 1e18 = 0.0075 + 0.02 L1
     assert est.gas_entry_usd == Decimal("0.0275")
     assert est.fees_usd == 0
+
+
+def test_pendle_fee_from_fee_rate() -> None:
+    opp = replace(pt(asset="USDC", days=73), extra={"fee_rate": "0.002"})
+    # 0.002 * 73/365 = 0.0004 = 4 bps of 10k = 4 USD
+    assert model().estimate(opp, Decimal(10_000)).fees_usd == Decimal(4)
+    bad = replace(pt(asset="USDC"), extra={"fee_rate": "nope"})
+    assert model().estimate(bad, Decimal(10_000)).fees_usd == Decimal(2)  # fallback 2 bps

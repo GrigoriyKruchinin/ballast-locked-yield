@@ -309,6 +309,7 @@ class PendleNormalizer:
                 "sy": snap.sy,
                 "accounting": snap.accounting,
                 "protocol_name": snap.protocol_name,
+                **({"fee_rate": str(snap.fee_rate)} if snap.fee_rate is not None else {}),
             },
         )
 
