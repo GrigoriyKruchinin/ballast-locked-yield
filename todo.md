@@ -28,14 +28,15 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 ## Stage 1: MVP + research (no real money), branch `stage-1-mvp`
 
 ### Foundation
-- [ ] `pyproject.toml` (uv, Python 3.12), ruff, mypy strict, pytest, pytest-asyncio, hypothesis; `uv.lock`
-- [ ] `Makefile`: `lint`, `typecheck`, `test`, `check`, `up`, `down`, `migrate`, `backtest`, `scan`, `simulate`, `report`
-- [ ] Package layout (`src/ballast/`: `domain`, `sources`, `chains`, `risk`, `costs`, `allocation`, `execution`, `portfolio`, `notify`, `storage`, `workers`, `analytics`, `config`)
-- [ ] Modular Pydantic Settings: `DatabaseSettings`, `RedisSettings`, `ChainSettings`, `DataSourceSettings`, `RiskSettings`, `AllocationSettings`, `CostSettings`, `TelegramSettings`, `AppSettings`; per-role settings factories
-- [ ] Asset/protocol whitelist config (YAML/TOML) with tiers and limits; unknown = rejected; validation tests
-- [ ] Domain model: `Token` (address, chain, decimals), `Amount` (Decimal + decimals), `Opportunity`, `Position`, `RiskScore`, `CostEstimate`, `NlyResult`
-- [ ] Interfaces: `ILockedYieldSource`, `IChainClient`, `IPriceOracle`, `IRiskRule`, `ICostModel`, `IAllocator`, `ITxExecutor`
-- [ ] Structured logging with secret redaction (test that keys never appear)
+- [x] `pyproject.toml` (uv, Python 3.12), ruff, mypy strict, pytest, pytest-asyncio, hypothesis; `uv.lock`
+- [x] `Makefile`: `lint`, `typecheck`, `test`, `check`, `up`, `down`, `migrate`, `backtest`, `scan`, `simulate`, `report`
+- [x] Package layout (`src/ballast/`: `domain`, `sources`, `chains`, `risk`, `costs`, `allocation`, `execution`, `portfolio`, `notify`, `storage`, `workers`, `analytics`, `config`)
+- [x] Modular Pydantic Settings: `DatabaseSettings`, `RedisSettings`, `ChainSettings`, `DataSourceSettings`, `RiskSettings`, `AllocationSettings`, `CostSettings`, `TelegramSettings`, `AppSettings`; per-role settings factories
+- [x] Asset/protocol whitelist config (YAML/TOML) with tiers and limits; unknown = rejected; validation tests
+- [ ] Pin and on-chain verify remaining whitelist addresses (USDS, sUSDS, aTokens, USDe, sUSDe, USDT on Base) via `make verify-whitelist`
+- [x] Domain model: `Token` (address, chain, decimals), `Amount` (Decimal + decimals), `Opportunity`, `Position`, `RiskScore`, `CostEstimate`, `NlyResult`
+- [x] Interfaces: `ILockedYieldSource`, `IChainClient`, `IPriceOracle`, `IRiskRule`, `ICostModel`, `IAllocator`, `ITxExecutor`
+- [x] Structured logging with secret redaction (test that keys never appear)
 
 ### Storage
 - [ ] SQLAlchemy async models: market snapshots, rate snapshots, futures snapshots, NLY results, risk scores, paper positions, simulated txs, monitor events, decision log (entered/skipped + reason), backtest runs/results
