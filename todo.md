@@ -40,7 +40,7 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 
 ### Storage
 - [x] SQLAlchemy async models: market snapshots, rate snapshots, futures snapshots, NLY results, risk scores, paper positions, simulated txs, monitor events, decision log (entered/skipped + reason), backtest runs/results
-- [ ] Alembic setup + initial migration (done, verified up/down/check on Postgres 16); migrations container (pending, Docker task)
+- [x] Alembic setup + migrations; dedicated `migrations` container
 - [x] Repository layer + tests (sqlite by default, Postgres via `TEST_DATABASE_URL`)
 
 ### Data Collector
@@ -101,9 +101,10 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 - [x] Alerts: new opportunities above threshold, daily and weekly summaries, risk events (DB-driven, notifier role only)
 
 ### Docker (local)
-- [ ] Dockerfiles; `docker-compose.local.yml`: postgres, redis, migrations, beat, collector worker, analytics worker, telegram worker, fork simulator
-- [ ] Healthchecks for all services; `depends_on: condition: service_healthy`; per-role env subsets
-- [ ] `.github/workflows/ci.yml`: ruff, mypy, pytest, `docker compose config`
+- [x] Dockerfile; `docker-compose.local.yml`: postgres, redis, migrations, beat, collector, analytics, telegram workers (verified live)
+- [ ] Fork simulator service (with the fork simulation task)
+- [x] Healthchecks for all services; `depends_on: condition: service_healthy`; per-role env subsets (secret isolation verified)
+- [x] `.github/workflows/ci.yml`: ruff, mypy, migrations on Postgres, pytest, `docker compose config`, image build
 
 ### Research and report
 - [ ] ≥ 4 weeks of live collection

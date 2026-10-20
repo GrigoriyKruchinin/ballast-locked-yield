@@ -1,0 +1,51 @@
+name: ci
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ballast
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ballast
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U ballast" --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      DB_URL_OVERRIDE: postgresql+asyncpg://ballast:ci@localhost:5432/ballast
+      TEST_DATABASE_URL: postgresql+asyncpg://ballast:ci@localhost:5432/ballast
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.9.8"
+      - run: uv sync --frozen
+      - name: ruff
+        run: uv run ruff check . && uv run ruff format --check .
+      - name: mypy
+        run: uv run mypy
+      - name: migrations (upgrade, drift check, downgrade)
+        run: uv run alembic upgrade head && uv run alembic check && uv run alembic downgrade base && uv run alembic upgrade head
+      - name: pytest
+        run: uv run pytest -m "not integration and not fork"
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: compose config
+        env:
+          DB_PASSWORD: ci
+        run: docker compose -f docker-compose.local.yml config -q
+      - name: build image
+        run: docker build -t ballast:ci .

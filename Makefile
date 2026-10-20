@@ -1,4 +1,4 @@
-.PHONY: help sync lint fmt typecheck test test-all check up down logs ps migrate scan backtest simulate report verify-whitelist
+.PHONY: help sync lint fmt typecheck test test-all check up down logs ps migrate scan kick backfill notify-test digest backtest simulate report verify-whitelist config
 
 COMPOSE := docker compose -f docker-compose.local.yml
 RUN := uv run
@@ -30,6 +30,7 @@ check: lint typecheck test
 
 up:
 	$(COMPOSE) up -d --build
+	@echo "Stack started. First scheduled scan runs after SNAPSHOT_INTERVAL_MINUTES; 'make kick' runs one now."
 
 down:
 	$(COMPOSE) down
@@ -43,17 +44,32 @@ ps:
 migrate:
 	$(COMPOSE) run --rm migrations
 
-scan:
-	$(RUN) ballast scan
+scan:  ## one scan inside the collector container
+	$(COMPOSE) exec collector ballast scan
+
+kick:  ## queue a scan now (beat otherwise starts after the first interval)
+	$(COMPOSE) exec collector celery -A ballast.workers.celery_app call ballast.scan
+
+backfill:  ## queue the matured-market history backfill
+	$(COMPOSE) exec analytics celery -A ballast.workers.celery_app call ballast.backfill_history
+
+notify-test:
+	$(COMPOSE) exec notifier ballast notify-test
+
+digest:
+	$(COMPOSE) exec notifier ballast digest
 
 backtest:
-	$(RUN) ballast backtest
+	$(COMPOSE) exec analytics ballast backtest
 
 simulate:
-	$(RUN) ballast simulate
+	$(COMPOSE) exec analytics ballast simulate
 
 report:
-	$(RUN) ballast report
+	$(COMPOSE) exec analytics ballast report
 
 verify-whitelist:
-	$(RUN) ballast verify-whitelist
+	$(COMPOSE) exec collector ballast verify-whitelist
+
+config:  ## validate compose file
+	$(COMPOSE) config -q

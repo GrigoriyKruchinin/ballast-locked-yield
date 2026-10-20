@@ -1,0 +1,132 @@
+# Stage 1 local stack: research mode, public data only, no wallets.
+# Values come from .env (compose interpolation). Each service receives only the variables it needs.
+
+x-db-env: &db-env
+  DB_HOST: postgres
+  DB_PORT: "5432"
+  DB_NAME: ${DB_NAME:-ballast}
+  DB_USER: ${DB_USER:-ballast}
+  DB_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+
+x-app-env: &app-env
+  APP_ENV: ${APP_ENV:-local}
+  APP_LOG_LEVEL: ${APP_LOG_LEVEL:-INFO}
+  REDIS_URL: redis://redis:6379/0
+  SNAPSHOT_INTERVAL_MINUTES: ${SNAPSHOT_INTERVAL_MINUTES:-15}
+
+x-chain-env: &chain-env
+  CHAIN_ENABLED: ${CHAIN_ENABLED:-ethereum,arbitrum,base}
+  RPC_URL_ETHEREUM: ${RPC_URL_ETHEREUM:-}
+  RPC_URL_ARBITRUM: ${RPC_URL_ARBITRUM:-}
+  RPC_URL_BASE: ${RPC_URL_BASE:-}
+
+x-analysis-env: &analysis-env
+  PAPER_CAPITAL_USD: ${PAPER_CAPITAL_USD:-10000}
+  RESERVE_PCT: ${RESERVE_PCT:-5}
+  MAX_PROTOCOL_PCT: ${MAX_PROTOCOL_PCT:-35}
+  MAX_TIER_B_PCT: ${MAX_TIER_B_PCT:-25}
+  MAX_TIER_B_ASSET_PCT: ${MAX_TIER_B_ASSET_PCT:-15}
+  MAX_MATURITY_DAYS: ${MAX_MATURITY_DAYS:-183}
+  MAX_GAS_PCT_OF_POSITION: ${MAX_GAS_PCT_OF_POSITION:-0.3}
+  TIER_A_PREMIUM_PP: ${TIER_A_PREMIUM_PP:-2}
+  TIER_B_PREMIUM_PP: ${TIER_B_PREMIUM_PP:-6}
+
+x-worker: &worker
+  build: .
+  image: ballast:local
+  restart: unless-stopped
+  depends_on:
+    postgres: { condition: service_healthy }
+    redis: { condition: service_healthy }
+    migrations: { condition: service_completed_successfully }
+  healthcheck:
+    test: ["CMD-SHELL", "celery -A ballast.workers.celery_app inspect ping -d $${WORKER_NAME}@$$HOSTNAME --timeout 10 | grep -q pong"]
+    interval: 60s
+    timeout: 20s
+    retries: 3
+    start_period: 30s
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-ballast}
+      POSTGRES_USER: ${DB_USER:-ballast}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:${DB_HOST_PORT:-55433}:5432"  # localhost only; change if the port is taken
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  migrations:
+    build: .
+    image: ballast:local
+    command: ["alembic", "upgrade", "head"]
+    environment:
+      <<: *db-env
+    depends_on:
+      postgres: { condition: service_healthy }
+    restart: "no"
+
+  beat:
+    build: .
+    image: ballast:local
+    restart: unless-stopped
+    command: ["celery", "-A", "ballast.workers.celery_app", "beat", "--loglevel", "INFO", "--schedule", "/tmp/celerybeat-schedule"]
+    environment:
+      <<: *app-env
+    depends_on:
+      redis: { condition: service_healthy }
+      migrations: { condition: service_completed_successfully }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import os,sys,time; p='/tmp/celerybeat-schedule'; sys.exit(0 if os.path.exists(p) and time.time()-os.path.getmtime(p) < 600 else 1)"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  collector:
+    <<: *worker
+    command: ["celery", "-A", "ballast.workers.celery_app", "worker", "-Q", "scan", "-c", "1", "-n", "collector@%h", "--loglevel", "INFO"]
+    environment:
+      <<: [*app-env, *db-env, *chain-env, *analysis-env]
+      WORKER_NAME: collector
+
+  analytics:
+    <<: *worker
+    command: ["celery", "-A", "ballast.workers.celery_app", "worker", "-Q", "analytics", "-c", "1", "-n", "analytics@%h", "--loglevel", "INFO"]
+    environment:
+      <<: [*app-env, *db-env, *chain-env, *analysis-env]
+      WORKER_NAME: analytics
+
+  notifier:
+    <<: *worker
+    command: ["celery", "-A", "ballast.workers.celery_app", "worker", "-Q", "notify", "-c", "1", "-n", "notifier@%h", "--loglevel", "INFO"]
+    environment:
+      <<: [*app-env, *db-env]
+      CHAIN_ENABLED: ${CHAIN_ENABLED:-ethereum,arbitrum,base}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+      WORKER_NAME: notifier
+
+volumes:
+  pgdata:
+  redisdata:
