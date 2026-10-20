@@ -45,7 +45,7 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 
 ### Data Collector
 - [x] Verify current docs and rate limits: Pendle API, DefiLlama, Alchemy, CEX futures APIs (subagent; summary to `docs/research/data-sources.md`)
-- [ ] Pendle source: markets on Ethereum/Arbitrum/Base (+ observe-only: all other Pendle chains) (PT price, implied APY, maturity, liquidity, underlying, SY/PT/YT addresses)
+- [x] Pendle source: markets on Ethereum/Arbitrum/Base (+ observe-only: all other Pendle chains) (PT price, implied APY, maturity, liquidity, underlying, SY/PT/YT addresses)
 - [ ] Parking rates: Aave v3 / Compound v3 via DefiLlama (done); on-chain Aave `getReserveData` cross-check (pending)
 - [x] Dated futures vs spot: public prices (Binance, OKX, Deribit) → annualized basis (data only)
 - [x] Gas price collector per chain (L2 execution + L1 data fee)
@@ -66,16 +66,16 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 ### NLY Calculator and Cost Model
 - [x] `ICostModel`: entry/exit gas, pool/protocol fees, slippage (liquidity heuristic + quoted-impact model)
 - [x] Hourly Pendle convert quotes stored (AMM-only and with limit orders) and fed into `QuotedSlippage`
-- [ ] Calibrate gas units / venue fee / slippage heuristic against quotes and fork runs
+- [x] Calibrate gas units / venue fee / slippage against quotes and fork runs (fork: +0.01% vs model)
 - [x] NLY = (payoff at maturity − entry cost − gas in/out − slippage − fees) / capital / term → APY and % per month
-- [ ] Min position size such that gas ≤ 0.3% (done: `min_position_usd`); max position size from liquidity impact (in Allocator)
+- [x] Min position size such that gas ≤ 0.3% (`min_position_usd`); max position size from liquidity share (Allocator)
 - [x] Unit + hypothesis property tests (monotonicity, decimals round-trip, conservative rounding)
 
 ### Risk Scorer and incident catalog
 - [x] `IRiskRule` set: age & audits, TVL level and trend, par redemption path, depeg history, oracle dependency, centralized counterparties, pause/admin keys
 - [x] Risk score per asset/protocol; tier assignment; entry threshold = parking + tier premium (+ 0.02 pp per risk point)
 - [x] Incident catalog (`config/incidents.yaml` + `docs/research/incidents.md`, 31 entries) with sources: synthetic stablecoin depegs and collapses, protocol hacks, freezes
-- [ ] Per tier: premium over parking vs historical incident losses (does the risk pay?) — adjustment in backtest metrics done; per-tier table pending
+- [x] Per tier: premium over parking vs historical incident losses (backtest adjustment + table in Go/No-Go report)
 
 ### Allocator
 - [x] Limits: per protocol 35%, Tier B 25%, per B asset 15%, max maturity 183 days, reserve 5%, min position
@@ -107,7 +107,7 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 - [x] `.github/workflows/ci.yml`: ruff, mypy, migrations on Postgres, pytest, `docker compose config`, image build
 
 ### Research and report
-- [ ] ≥ 4 weeks of live collection
+- [ ] ≥ 4 weeks of live collection (started 2026-10-20 18:13 UTC; earliest report date 2026-11-17)
 - [ ] Run `run-backtest` (out-of-sample) and `audit-risks`
 - [x] Go/No-Go data report generator (`ballast report`): live books, universe, NLY distribution, weekly opportunities, fork checks, tier premium vs incident loss
 - [ ] `docs/reports/stage-1-go-no-go.md`: metrics, NLY distribution, weekly opportunities, parking comparison, fork checks, incident catalog, risk assessment, recommendation, "Простыми словами" block
@@ -119,7 +119,7 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
   - [ ] Fork simulation within 0.3%
   - [ ] No protocol > 35%, Tier B ≤ 25%
   - [ ] Positive after incident-loss adjustment
-- [ ] README updated (features, quick start, architecture, configuration); status badge
+- [ ] README updated (features, quick start, architecture, configuration: done); status badge at stage completion
 - [ ] `chore: complete stage 1`, tag `v0.1.0`, merge to `main`, push
 
 ## Fork after Stage 1
