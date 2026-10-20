@@ -63,3 +63,11 @@ User decision: **add Ethereum** to scanning, paper portfolio and Go criteria. Mi
 - The 35% per-protocol cap applies to the *yield-bearing* protocol/issuer (Ethena, Sky, Aave, Circle...), also to parking.
   Pendle as a venue has its own cap `MAX_VENUE_PCT` = 70%; otherwise 70% deployment would be impossible by construction.
 - The scanner records **all** stablecoin markets (for the research report); only whitelisted assets can enter the paper portfolio.
+
+## 2026-10-20: Other chains (user asked about Starknet, Polygon, Tron, zkSync)
+
+Pendle API `/v1/chains` lists: 1, 10, 56, 143 (Monad), 146, 196, 999 (HyperEVM), 4663, 5000, 8453, 9745 (Plasma), 42161, 80094.
+No Pendle on Starknet, Polygon, Tron or zkSync (non-EVM Starknet/Tron also lack comparable fixed-rate venues): not added.
+Notable: Monad sUSDe (~16.5M USD liquidity), Plasma sUSDe (~3.4M). Both are young chains with bridged (OFT) USDe: bridge risk.
+Default: **observe all Pendle chains** (Pendle API only, no RPC) for the report; **paper portfolio and Go criteria use
+Ethereum, Arbitrum, Base only**. Young chains can be reconsidered at the post-Stage-1 fork with data.

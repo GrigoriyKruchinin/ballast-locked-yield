@@ -174,7 +174,7 @@ def test_exposures() -> None:
     assert exp == {"protocol:ethena", "venue:pendle", "asset:sUSDe", "tier:B", "chain:ethereum"}
     park = exposures_for(parking(), WL)
     assert "protocol:aave-v3" in park
-    assert "protocol:circle" in park
+    assert "protocol:circle" not in park  # unit-of-account issuer is cap-exempt
     assert not any(e.startswith("venue:") for e in park)
 
 

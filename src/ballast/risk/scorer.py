@@ -31,7 +31,11 @@ def exposures_for(opportunity: Opportunity, whitelist: Whitelist) -> frozenset[s
     """Exposure keys used by allocator limits: venue, protocols, asset, tier, chain."""
     asset = whitelist.find_asset(opportunity.asset_symbol, opportunity.chain, opportunity.asset_address)
     protocols = {opportunity.protocol, *(asset.protocols if asset else ())}
-    keys = {f"protocol:{p}" for p in protocols}
+    keys = {
+        f"protocol:{p}"
+        for p in protocols
+        if p not in whitelist.protocols or not whitelist.protocols[p].cap_exempt
+    }
     if opportunity.venue not in protocols:
         keys.add(f"venue:{opportunity.venue}")
     keys.add(f"asset:{asset.symbol if asset else opportunity.asset_symbol}")

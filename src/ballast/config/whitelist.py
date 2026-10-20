@@ -29,6 +29,9 @@ class ProtocolInfo(BaseModel):
     upgradeable: bool
     centralized_counterparty: bool
     oracle_dependency: OracleDependency
+    # Issuers of the unit of account (USDC/USDT) are exempt from per-protocol caps:
+    # capital is denominated in them, so capping them would cap holding cash itself.
+    cap_exempt: bool = False
     notes: str = ""
 
 

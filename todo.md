@@ -45,7 +45,7 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 
 ### Data Collector
 - [x] Verify current docs and rate limits: Pendle API, DefiLlama, Alchemy, CEX futures APIs (subagent; summary to `docs/research/data-sources.md`)
-- [ ] Pendle source: markets on Ethereum/Arbitrum/Base (PT price, implied APY, maturity, liquidity, underlying, SY/PT/YT addresses)
+- [ ] Pendle source: markets on Ethereum/Arbitrum/Base (+ observe-only: all other Pendle chains) (PT price, implied APY, maturity, liquidity, underlying, SY/PT/YT addresses)
 - [ ] Parking rates: Aave v3 (and similar Tier A lending) via DefiLlama + RPC cross-check
 - [ ] Dated futures vs spot: public prices (Binance, OKX, Deribit) → annualized basis (data only)
 - [ ] Gas price collector per chain (L2 execution + L1 data fee)
@@ -73,10 +73,10 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 - [ ] Per tier: premium over parking vs historical incident losses (does the risk pay?)
 
 ### Allocator
-- [ ] Limits: per protocol 35%, Tier B 25%, per B asset 15%, max maturity 183 days, reserve 5%, min position
-- [ ] Ranking by risk-adjusted NLY; liquidity-capped sizing; fallback to parking
-- [ ] Decision log for every entered/skipped opportunity
-- [ ] Tests for every limit and edge case
+- [x] Limits: per protocol 35%, Tier B 25%, per B asset 15%, max maturity 183 days, reserve 5%, min position
+- [x] Ranking by risk-adjusted NLY; liquidity-capped sizing; fallback to parking
+- [ ] Decision log for every entered/skipped opportunity (decisions produced by Allocator; DB persistence pending)
+- [x] Tests for every limit and edge case
 
 ### Fork Simulator (Anvil)
 - [ ] `ITxExecutor` fork implementation: spawn Anvil fork (Arbitrum/Base), fund test account, run entry/exit via Pendle router

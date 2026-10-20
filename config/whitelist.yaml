@@ -33,6 +33,7 @@ protocols:
     notes: Parking venue (Comet USDC markets).
   circle:
     kind: issuer
+    cap_exempt: true
     launched: 2018-09
     audits: 0
     admin_pause: true
@@ -42,6 +43,7 @@ protocols:
     notes: USDC issuer; fiat-backed, can freeze addresses. Depeg Mar 2023 (SVB).
   tether:
     kind: issuer
+    cap_exempt: true
     launched: 2014-10
     audits: 0
     admin_pause: true
