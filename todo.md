@@ -46,9 +46,9 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 ### Data Collector
 - [x] Verify current docs and rate limits: Pendle API, DefiLlama, Alchemy, CEX futures APIs (subagent; summary to `docs/research/data-sources.md`)
 - [ ] Pendle source: markets on Ethereum/Arbitrum/Base (+ observe-only: all other Pendle chains) (PT price, implied APY, maturity, liquidity, underlying, SY/PT/YT addresses)
-- [ ] Parking rates: Aave v3 (and similar Tier A lending) via DefiLlama + RPC cross-check
-- [ ] Dated futures vs spot: public prices (Binance, OKX, Deribit) → annualized basis (data only)
-- [ ] Gas price collector per chain (L2 execution + L1 data fee)
+- [ ] Parking rates: Aave v3 / Compound v3 via DefiLlama (done); on-chain Aave `getReserveData` cross-check (pending)
+- [x] Dated futures vs spot: public prices (Binance, OKX, Deribit) → annualized basis (data only)
+- [x] Gas price collector per chain (L2 execution + L1 data fee)
 - [ ] Celery beat schedule: snapshots every 15 min; retries, backoff, rate-limit handling
 - [ ] Opportunity Normalizer: all sources → `Opportunity`
 
