@@ -125,7 +125,8 @@ def _closeness(r: BacktestResult) -> str:
         return "No risk-allowed whitelisted candidate existed on any day of the validation window."
     decision_days = len(r.records)
     return (
-        f"Risk-allowed candidates existed on {m.days_with_allowed_candidate} of {decision_days} decision days. "
+        f"Risk-allowed candidates existed on {m.days_with_allowed_candidate} of {decision_days} "
+        "decision days. "
         f"Best NLY minus entry threshold: median {m.median_best_excess_pp:.2f} pp, "
         f"best day {m.max_best_excess_pp:.2f} pp (positive would mean an entry)."
     )
