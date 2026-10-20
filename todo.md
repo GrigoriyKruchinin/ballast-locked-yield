@@ -33,7 +33,7 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 - [x] Package layout (`src/ballast/`: `domain`, `sources`, `chains`, `risk`, `costs`, `allocation`, `execution`, `portfolio`, `notify`, `storage`, `workers`, `analytics`, `config`)
 - [x] Modular Pydantic Settings: `DatabaseSettings`, `RedisSettings`, `ChainSettings`, `DataSourceSettings`, `RiskSettings`, `AllocationSettings`, `CostSettings`, `TelegramSettings`, `AppSettings`; per-role settings factories
 - [x] Asset/protocol whitelist config (YAML/TOML) with tiers and limits; unknown = rejected; validation tests
-- [ ] Pin and on-chain verify remaining whitelist addresses (USDS, sUSDS, aTokens, USDe, sUSDe, USDT on Base) via `make verify-whitelist`
+- [x] Pin and on-chain verify whitelist addresses via `make verify-whitelist` (13/13 OK on Ethereum/Arbitrum/Base; aTokens and L2 USDe/sUSDe unpinned = research-only there)
 - [x] Domain model: `Token` (address, chain, decimals), `Amount` (Decimal + decimals), `Opportunity`, `Position`, `RiskScore`, `CostEstimate`, `NlyResult`
 - [x] Interfaces: `ILockedYieldSource`, `IChainClient`, `IPriceOracle`, `IRiskRule`, `ICostModel`, `IAllocator`, `ITxExecutor`
 - [x] Structured logging with secret redaction (test that keys never appear)
@@ -52,6 +52,7 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 - [ ] Celery beat schedule: snapshots every 15 min; retries, backoff, rate-limit handling
 - [x] Opportunity Normalizer: all sources → `Opportunity`
 - [x] Collect + analyze pipeline (`ballast.pipeline`): sources → NLY → risk → allocation, verified live end-to-end
+- [x] Scan runner + CLI (`ballast scan`): persists snapshots, NLY, risk, decisions, paper books `all` / `l2`; verified live on Postgres
 - [ ] Cost cross-chain moves (USDC via CCTP, USDS bridges) between parking and positions on different chains
 
 ### Backtest on matured markets
@@ -77,7 +78,7 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 ### Allocator
 - [x] Limits: per protocol 35%, Tier B 25%, per B asset 15%, max maturity 183 days, reserve 5%, min position
 - [x] Ranking by risk-adjusted NLY; liquidity-capped sizing; fallback to parking
-- [ ] Decision log for every entered/skipped opportunity (decisions produced by Allocator; DB persistence pending)
+- [x] Decision log for every entered/skipped opportunity (persisted per scan and book)
 - [x] Tests for every limit and edge case
 
 ### Fork Simulator (Anvil)
