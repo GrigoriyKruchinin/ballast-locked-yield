@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Ballast logo">
+  <defs>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1f4e79"/>
+      <stop offset="1" stop-color="#0b2540"/>
+    </linearGradient>
+  </defs>
+  <circle cx="100" cy="100" r="96" fill="url(#sea)"/>
+  <!-- waterline -->
+  <path d="M22 86 Q 42 76 62 86 T 102 86 T 142 86 T 178 86" fill="none" stroke="#9fd3ff" stroke-width="5" stroke-linecap="round"/>
+  <!-- hull -->
+  <path d="M48 72 L152 72 L136 98 L64 98 Z" fill="#e8f1f8"/>
+  <!-- keel -->
+  <rect x="96" y="98" width="8" height="36" fill="#e8f1f8"/>
+  <!-- ballast weight -->
+  <path d="M74 134 L126 134 L118 160 L82 160 Z" fill="#f2b632"/>
+  <path d="M90 147 L110 147" stroke="#0b2540" stroke-width="4" stroke-linecap="round"/>
+</svg>
