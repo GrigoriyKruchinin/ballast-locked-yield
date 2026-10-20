@@ -55,21 +55,22 @@ class IncidentCatalog(BaseModel):
     def by_tier(self, tier: Tier) -> list[Incident]:
         return [i for i in self.incidents if i.tier_like is tier]
 
-    def annual_expected_loss(self, tier: Tier, start: date, end: date) -> Decimal:
-        """Sum of holder losses (fraction) per year for ``tier``-like incidents in ``[start, end]``.
+    def annual_expected_loss(self, tier: Tier, start: date, end: date, universe_size: int) -> Decimal:
+        """Expected loss per asset-year (fraction) for a holder of one ``tier``-like asset.
 
-        Assumes an equal-weight holder exposed to one affected asset at a time; a crude base rate
-        that is reported alongside the sample size, never as a precise probability.
+        ``sum(holder losses in window) / (years * universe_size)``, where ``universe_size`` is the number of
+        comparable assets the incidents were drawn from (see ``docs/research/incidents.md``: about 8 for
+        Tier A-like, about 30 for Tier B-like). A crude base rate, always reported with its sample size.
         """
         years = Decimal((end - start).days) / Decimal(365)
-        if years <= 0:
-            msg = "empty window"
+        if years <= 0 or universe_size <= 0:
+            msg = "empty window or universe"
             raise ValueError(msg)
         losses = sum(
             (i.holder_loss_pct / Decimal(100) for i in self.by_tier(tier) if start <= i.date <= end),
             Decimal(0),
         )
-        return losses / years
+        return losses / (years * universe_size)
 
 
 def load_incidents(path: Path) -> IncidentCatalog:

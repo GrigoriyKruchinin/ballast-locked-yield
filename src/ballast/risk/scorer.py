@@ -103,6 +103,6 @@ def default_rules(
         TvlRule(state, risk.min_tvl_usd, risk.tvl_drop_warn_pct, risk.tvl_drop_critical_pct),
         LiquidityRule(risk.min_market_liquidity_usd),
         PegRule(state, whitelist, risk.depeg_warn_pct, risk.depeg_critical_pct),
-        DepegHistoryRule(catalog),
+        DepegHistoryRule(catalog, whitelist),
         YieldAnomalyRule(state),
     ]

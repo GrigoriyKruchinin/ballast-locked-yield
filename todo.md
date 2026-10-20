@@ -69,7 +69,7 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 ### Risk Scorer and incident catalog
 - [x] `IRiskRule` set: age & audits, TVL level and trend, par redemption path, depeg history, oracle dependency, centralized counterparties, pause/admin keys
 - [x] Risk score per asset/protocol; tier assignment; entry threshold = parking + tier premium (+ 0.02 pp per risk point)
-- [ ] Incident catalog (`data/incidents.yaml` + `docs/research/incidents.md`) with sources: synthetic stablecoin depegs and collapses, protocol hacks, freezes
+- [x] Incident catalog (`config/incidents.yaml` + `docs/research/incidents.md`, 31 entries) with sources: synthetic stablecoin depegs and collapses, protocol hacks, freezes
 - [ ] Per tier: premium over parking vs historical incident losses (does the risk pay?)
 
 ### Allocator

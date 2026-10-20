@@ -14,7 +14,7 @@ from decimal import Decimal
 from ballast.config.whitelist import AssetInfo, OracleDependency, Whitelist
 from ballast.domain.models import Opportunity, RiskFinding, SourceKind
 from ballast.domain.money import HUNDRED, ZERO, pct
-from ballast.risk.incidents import IncidentCatalog
+from ballast.risk.incidents import Incident, IncidentCatalog
 
 
 @dataclass(frozen=True, slots=True)
@@ -228,16 +228,26 @@ class PegRule:
 
 @dataclass(frozen=True, slots=True)
 class DepegHistoryRule:
+    """Scores recorded incidents of the asset, its peg asset (USDe for sUSDe) and its protocols."""
+
     catalog: IncidentCatalog
+    whitelist: Whitelist
     points_per_incident: Decimal = Decimal(4)
     points_per_loss_pct: Decimal = Decimal(2)
     name: str = "depeg_history"
 
     def evaluate(self, opportunity: Opportunity) -> RiskFinding:
-        incidents = self.catalog.for_asset(opportunity.asset_symbol)
-        incidents += [i for i in self.catalog.for_protocol(opportunity.protocol) if i not in incidents]
-        if not incidents:
+        asset = _lookup(self.whitelist, opportunity)
+        symbols = {opportunity.asset_symbol, *((asset.symbol, asset.peg_symbol) if asset else ())}
+        protocols = {opportunity.protocol, *(asset.protocols if asset else ())}
+        seen: dict[str, Incident] = {}
+        for symbol in sorted(symbols):
+            seen.update({i.id: i for i in self.catalog.for_asset(symbol)})
+        for slug in sorted(protocols):
+            seen.update({i.id: i for i in self.catalog.for_protocol(slug)})
+        if not seen:
             return _ok(self.name, "no recorded incidents")
+        incidents = sorted(seen.values(), key=lambda i: i.date, reverse=True)
         score = sum(
             (self.points_per_incident + self.points_per_loss_pct * i.holder_loss_pct for i in incidents),
             ZERO,

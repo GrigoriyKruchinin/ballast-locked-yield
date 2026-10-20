@@ -9,8 +9,8 @@ from ballast.config.settings import AllocationSettings, RiskSettings
 from ballast.config.whitelist import load_whitelist
 from ballast.domain.models import Chain, Opportunity, Tier
 from ballast.nly.calculator import NlyCalculator
-from ballast.risk.incidents import Incident, IncidentCatalog, IncidentKind
-from ballast.risk.rules import MarketState, PegRule, TvlRule, YieldAnomalyRule
+from ballast.risk.incidents import Incident, IncidentCatalog, IncidentKind, load_incidents
+from ballast.risk.rules import DepegHistoryRule, MarketState, PegRule, TvlRule, YieldAnomalyRule
 from ballast.risk.scorer import RiskScorer, default_rules, exposures_for
 from tests.factories import NOW, ZERO_COSTS, FixedCostModel, parking, pt
 
@@ -186,6 +186,16 @@ def test_candidate_build() -> None:
 
 
 def test_incident_base_rate() -> None:
-    loss = CATALOG.annual_expected_loss(Tier.B, date(2024, 1, 1), date(2026, 1, 1))
-    assert abs(loss - Decimal("0.7") / (Decimal(731) / Decimal(365))) < Decimal("1e-20")
-    assert CATALOG.annual_expected_loss(Tier.A, date(2024, 1, 1), date(2026, 1, 1)) == 0
+    loss = CATALOG.annual_expected_loss(Tier.B, date(2024, 1, 1), date(2026, 1, 1), universe_size=10)
+    assert abs(loss - Decimal("0.07") / (Decimal(731) / Decimal(365))) < Decimal("1e-20")
+    assert CATALOG.annual_expected_loss(Tier.A, date(2024, 1, 1), date(2026, 1, 1), universe_size=8) == 0
+    with pytest.raises(ValueError):
+        CATALOG.annual_expected_loss(Tier.A, date(2024, 1, 1), date(2026, 1, 1), universe_size=0)
+
+
+def test_project_catalog_loads_and_peg_history_applies() -> None:
+    catalog = load_incidents(Path(__file__).resolve().parents[2] / "config" / "incidents.yaml")
+    assert len(catalog.incidents) >= 20
+    assert all(i.sources for i in catalog.incidents)
+    finding = DepegHistoryRule(catalog, WL).evaluate(susde())
+    assert "usde-binance-2025-10" in finding.reason  # peg-asset incidents count for sUSDe
