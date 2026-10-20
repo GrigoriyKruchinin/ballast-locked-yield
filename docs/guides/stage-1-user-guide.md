@@ -92,6 +92,12 @@ Anvil делает локальную копию («форк») сети Arbitru
   anvil --version
   ```
   Должна появиться версия, например `anvil 1.x.x`.
+- [ ] Если пишет `foundryup: command not found` (установщик не всегда сам добавляет папку в PATH, то есть в список мест, где терминал ищет программы):
+  ```bash
+  echo 'export PATH="$PATH:$HOME/.foundry/bin"' >> ~/.bashrc
+  source ~/.bashrc
+  anvil --version
+  ```
 
 ⚠️ Ставьте Foundry только с официального адреса `foundry.paradigm.xyz`.
 
