@@ -23,7 +23,8 @@ from ballast.domain.models import (
 class ILockedYieldSource(Protocol):
     """A source of opportunities whose payoff is known at entry."""
 
-    name: str
+    @property
+    def name(self) -> str: ...
 
     async def fetch(self) -> Sequence[Opportunity]:
         """Return current opportunities. Must not raise on partial upstream failure."""
@@ -32,7 +33,8 @@ class ILockedYieldSource(Protocol):
 
 @runtime_checkable
 class IChainClient(Protocol):
-    chain: Chain
+    @property
+    def chain(self) -> Chain: ...
 
     async def block_number(self) -> int: ...
 
@@ -48,7 +50,8 @@ class IPriceOracle(Protocol):
 
 @runtime_checkable
 class IRiskRule(Protocol):
-    name: str
+    @property
+    def name(self) -> str: ...
 
     def evaluate(self, opportunity: Opportunity) -> RiskFinding: ...
 
@@ -73,6 +76,7 @@ class IAllocator(Protocol):
 class ITxExecutor(Protocol):
     """Executes a transaction: historical simulator, Anvil fork or live chain."""
 
-    name: str
+    @property
+    def name(self) -> str: ...
 
     async def execute(self, request: TxRequest) -> TxResult: ...

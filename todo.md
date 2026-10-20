@@ -7,9 +7,9 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 
 - Paper capital 10,000 USD; Stage 2 up to 10,000 USD, start with 500–1,000 USD.
 - **Mandatory Go threshold: net yield ≥ 0.5% / month** (~6.2% APY) on out-of-sample data, and ≥ parking + 3 pp APY.
-- Chains: Arbitrum, Base. Gas (entry + exit) ≤ 0.3% of position.
+- Chains: Ethereum, Arbitrum, Base (Ethereum added 2026-10-20: no whitelisted Pendle markets on L2s). Gas (entry + exit) ≤ 0.3% of position.
 - Tier A: USDC, USDT, DAI, USDS + established wrappers. Tier B: USDe, sUSDe (total ≤ 25%, per asset ≤ 15%). Tier C forbidden.
-- Per protocol ≤ 35%. Max maturity 183 days. Reserve 5%. Entry = parking + premium (A +2 pp, B +6 pp, to calibrate).
+- Per protocol ≤ 35% (issuer/lending protocols, incl. parking); Pendle venue ≤ 70%. Max maturity 183 days. Reserve 5%. Entry = parking + premium (A +2 pp, B +6 pp, to calibrate).
 - Snapshots every 15 min. Fork tolerance 0.3%.
 
 ## Stage 0: Infrastructure
@@ -44,8 +44,8 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 - [ ] Repository layer + tests (testcontainers or dockerized Postgres)
 
 ### Data Collector
-- [ ] Verify current docs and rate limits: Pendle API, DefiLlama, Alchemy, CEX futures APIs (subagent; summary to `docs/research/data-sources.md`)
-- [ ] Pendle source: markets on Arbitrum/Base (PT price, implied APY, maturity, liquidity, underlying, SY/PT/YT addresses)
+- [x] Verify current docs and rate limits: Pendle API, DefiLlama, Alchemy, CEX futures APIs (subagent; summary to `docs/research/data-sources.md`)
+- [ ] Pendle source: markets on Ethereum/Arbitrum/Base (PT price, implied APY, maturity, liquidity, underlying, SY/PT/YT addresses)
 - [ ] Parking rates: Aave v3 (and similar Tier A lending) via DefiLlama + RPC cross-check
 - [ ] Dated futures vs spot: public prices (Binance, OKX, Deribit) → annualized basis (data only)
 - [ ] Gas price collector per chain (L2 execution + L1 data fee)
@@ -67,8 +67,8 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 - [x] Unit + hypothesis property tests (monotonicity, decimals round-trip, conservative rounding)
 
 ### Risk Scorer and incident catalog
-- [ ] `IRiskRule` set: age & audits, TVL level and trend, par redemption path, depeg history, oracle dependency, centralized counterparties, pause/admin keys
-- [ ] Risk score per asset/protocol; tier assignment; entry threshold = parking + tier premium
+- [x] `IRiskRule` set: age & audits, TVL level and trend, par redemption path, depeg history, oracle dependency, centralized counterparties, pause/admin keys
+- [x] Risk score per asset/protocol; tier assignment; entry threshold = parking + tier premium (+ 0.02 pp per risk point)
 - [ ] Incident catalog (`data/incidents.yaml` + `docs/research/incidents.md`) with sources: synthetic stablecoin depegs and collapses, protocol hacks, freezes
 - [ ] Per tier: premium over parking vs historical incident losses (does the risk pay?)
 

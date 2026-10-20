@@ -40,6 +40,7 @@ class AssetInfo(BaseModel):
     protocols: tuple[str, ...]
     par_redemption: bool
     yield_bearing: bool = False
+    peg_asset: str | None = None
     aliases: tuple[str, ...] = ()
     addresses: dict[Chain, str] = Field(default_factory=dict)
 
@@ -56,6 +57,11 @@ class AssetInfo(BaseModel):
             msg = f"{self.symbol}: tier C assets cannot be whitelisted"
             raise ValueError(msg)
         return self
+
+    @property
+    def peg_symbol(self) -> str:
+        """Symbol whose USD price defines the peg (the asset itself unless it wraps another)."""
+        return self.peg_asset or self.symbol
 
     def address_on(self, chain: Chain) -> str | None:
         return self.addresses.get(chain)
