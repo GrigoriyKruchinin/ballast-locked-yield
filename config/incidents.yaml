@@ -1,0 +1,505 @@
+# Incident catalog: stablecoin depegs/collapses, venue hacks, freezes, oracle and governance events.
+# Scope: 2022-01 .. 2026-10-20. Methodology and base rates: docs/research/incidents.md.
+#
+# Field conventions:
+# - tier_like: A = fiat-backed / major stable, or a lending receipt of one on a major venue
+#   (aUSDC-like); B = synthetic / yield-bearing dollar; C = other (algorithmic, non-dollar
+#   collateral, third-party wrappers, small venues).
+# - min_price_usd: worst widely reported traded price; venue-specific prints are flagged in notes.
+# - holder_loss_pct: permanent loss for someone who held the affected asset (or deposit) through
+#   to resolution, NOT the loss of someone who sold at the bottom. Best estimate; ranges in notes.
+# - All values are estimated/historical and come from secondary reporting unless noted.
+
+incidents:
+  - id: ust-terra-2022-05
+    date: 2022-05-09
+    kind: collapse
+    assets: [UST]
+    protocols: [terra, anchor]
+    tier_like: C
+    min_price_usd: "0.01"
+    duration_days: null
+    holder_loss_pct: "98"
+    recovered: false
+    summary: "Algorithmic stablecoin UST lost its peg in a reflexive UST/LUNA death spiral (about $0.35 by May 9, ~$0.17 by May 13) and never recovered; the SEC puts combined UST/LUNA value destroyed at over $40B."
+    sources:
+      - https://coindesk.com/learn/the-fall-of-terra-a-timeline-of-the-meteoric-rise-and-crash-of-ust-and-luna
+      - https://corporatefinanceinstitute.com/resources/cryptocurrency/what-happened-to-terra
+    notes: "min_price_usd reflects where UST (later USTC) settled in the following months (~$0.01-0.02); sources for the May 2022 lows vary. Terra 2.0 airdrop compensation was partial and in a new volatile token. Classified C (endogenous collateral); base rate for algorithmic designs only."
+
+  - id: usdt-terra-contagion-2022-05
+    date: 2022-05-12
+    kind: depeg
+    assets: [USDT]
+    protocols: [tether]
+    tier_like: A
+    min_price_usd: "0.95"
+    duration_days: "1"
+    holder_loss_pct: "0"
+    recovered: true
+    summary: "USDT briefly traded around $0.95 during the Terra contagion while Tether processed several billion dollars of redemptions at par."
+    sources:
+      - https://www.cnbc.com/2022/05/12/tether-usdt-stablecoin-drops-below-1-peg.html
+      - https://fortune.com/crypto/2022/05/23/tether-investors-10-billion-terrausd-ust-stablecoins-crypto-crash
+    notes: "Low $0.95 (~07:24 GMT May 12 per CoinMarketCap via Reuters), back to ~$0.998 the same afternoon; ~$10B redeemed at par over the following weeks."
+
+  - id: usdd-2022-06
+    date: 2022-06-13
+    kind: depeg
+    assets: [USDD]
+    protocols: [tron-dao]
+    tier_like: C
+    min_price_usd: "0.91"
+    duration_days: null
+    holder_loss_pct: "0"
+    recovered: true
+    summary: "Tron's algorithmic USDD slid to about $0.91 amid the June 2022 market crash and traded below peg for weeks despite a 700M USDC defence by TRON DAO Reserve."
+    sources:
+      - https://fortune.com/crypto/2022/06/13/algorithmic-stablecoin-usdd-loses-peg-justin-sun-tron-decentralized-usd
+    notes: "Low $0.91 per CoinDesk (via Fortune); other outlets report ~$0.97. Repeated sub-peg periods through 2022-2023; duration below $0.99 not precisely known."
+
+  - id: usdc-tornado-freeze-2022-08
+    date: 2022-08-08
+    kind: freeze
+    assets: [USDC]
+    protocols: [circle]
+    tier_like: A
+    min_price_usd: null
+    duration_days: null
+    holder_loss_pct: "0"
+    recovered: true
+    summary: "After OFAC sanctioned Tornado Cash, Circle blacklisted the sanctioned addresses and froze about $75k of USDC."
+    sources:
+      - https://www.theblock.co/post/162172/circle-freezes-usdc-funds-in-tornado-cashs-us-treasury-sanctioned-wallets
+    notes: "At least ~75k USDC frozen across ~44 sanctioned addresses, including Tornado's USDC pool contract, so depositors in that pool could not withdraw. No loss for unrelated holders; proof that issuer blacklisting can hit a pool/vault contract holding USDC."
+
+  - id: busd-paxos-2023-02
+    date: 2023-02-13
+    kind: governance
+    assets: [BUSD]
+    protocols: [paxos, binance]
+    tier_like: A
+    min_price_usd: null
+    duration_days: null
+    holder_loss_pct: "0"
+    recovered: true
+    summary: "NYDFS ordered Paxos to stop minting BUSD; the token was wound down with 1:1 redemptions and no peg break."
+    sources:
+      - https://www.dfs.ny.gov/consumers/alerts/Paxos_and_Binance
+      - https://www.theblock.co/post/210932/paxos-will-no-longer-issue-binance-usd-stablecoin
+    notes: "Paxos halted issuance from 2023-02-21 and committed to USD redemptions through at least Feb 2024 (SEC Wells notice on Feb 3 in parallel). Regulatory wind-down, not a loss event; shows that a Tier A asset can be forced into run-off, which matters for long-dated fixed-rate positions."
+
+  - id: usdc-svb-2023-03
+    date: 2023-03-11
+    kind: depeg
+    assets: [USDC]
+    protocols: [circle]
+    tier_like: A
+    min_price_usd: "0.877"
+    duration_days: "3"
+    holder_loss_pct: "0"
+    recovered: true
+    summary: "USDC fell to about $0.87 after Circle disclosed $3.3B of reserves stuck at failed Silicon Valley Bank, recovering once US regulators guaranteed SVB deposits."
+    sources:
+      - https://www.theblock.co/post/218993/usdc-and-dai-remain-at-about-0-90-following-circles-disclosure-of-funds-at-svb
+      - https://www.axios.com/2023/03/11/circle-usdc-peg-svb
+    notes: "Worst prints $0.877-0.888 depending on venue/source; below $0.99 roughly Mar 10 late to Mar 13. Recovery depended on a government backstop, not on the issuer."
+
+  - id: dai-svb-2023-03
+    date: 2023-03-11
+    kind: depeg
+    assets: [DAI]
+    protocols: [sky]
+    tier_like: A
+    min_price_usd: "0.897"
+    duration_days: "3"
+    holder_loss_pct: "0"
+    recovered: true
+    summary: "DAI followed USDC down to roughly $0.89-0.90 because more than half of its collateral was USDC held via the peg stability module."
+    sources:
+      - https://www.theblock.co/post/218993/usdc-and-dai-remain-at-about-0-90-following-circles-disclosure-of-funds-at-svb
+      - https://hackernoon.com/usdc-got-depegged-following-the-svb-collapse
+    notes: "Low ~$0.897 (HackerNoon), ~$0.90 (The Block). Knock-on depeg; shows correlation between Tier A assets (USDC/DAI/USDS/sUSDS are not independent)."
+
+  - id: frax-svb-2023-03
+    date: 2023-03-11
+    kind: depeg
+    assets: [FRAX]
+    protocols: [frax]
+    tier_like: B
+    min_price_usd: "0.885"
+    duration_days: "3"
+    holder_loss_pct: "0"
+    recovered: true
+    summary: "Partially algorithmic FRAX fell to around $0.88 on its USDC backing during the SVB weekend and recovered with USDC."
+    sources:
+      - https://www.theblock.co/post/218993/usdc-and-dai-remain-at-about-0-90-following-circles-disclosure-of-funds-at-svb
+      - https://hackernoon.com/usdc-got-depegged-following-the-svb-collapse
+    notes: "Low ~$0.885 per HackerNoon; FXStreet saw ~$0.90 at press time."
+
+  - id: euler-v1-hack-2023-03
+    date: 2023-03-13
+    kind: hack
+    assets: [USDC, DAI, WETH, WBTC, stETH]
+    protocols: [euler]
+    tier_like: A
+    min_price_usd: null
+    duration_days: "30"
+    holder_loss_pct: "1"
+    recovered: true
+    summary: "A donation/liquidation logic flaw let an attacker drain about $197M from Euler v1 lending pools; nearly all funds were returned in April 2023 and redemptions reopened."
+    sources:
+      - https://rekt.news/euler-rekt/
+      - https://theblock.co/post/224705/euler-hacker-returns-funds
+    notes: "Tier A-like because depositors held eToken receipts of USDC/DAI, comparable to aUSDC. Deposits were frozen ~1 month (Mar 13 to Apr 12 redemptions). Reports differ on whether ~90% or ~100% of recoverable funds came back; holder loss range 0-10%."
+
+  - id: gho-below-peg-2023-07
+    date: 2023-07-15
+    kind: depeg
+    assets: [GHO]
+    protocols: [aave-v3]
+    tier_like: B
+    min_price_usd: "0.94"
+    duration_days: "200"
+    holder_loss_pct: "0"
+    recovered: true
+    summary: "Aave's crypto-collateralised GHO traded persistently below peg (around $0.96-0.98) for months after launch until rate hikes and a stability module restored it."
+    sources:
+      - https://thedefiant.io/news/defi/aave-s-gho-stablecoin-consistently-trades-under-dollar-peg
+      - https://www.dlnews.com/articles/defi/aave-stablecoin-gho-finally-reaches-1-peg/
+    notes: "Typical level ~$0.97, brief low $0.94 on 2023-08-08, below $0.96 on 2023-11-21; regained $1 more than six months after launch after safety-module integration (exact date not found, duration ~180-200 days). Slow, shallow depeg rather than a crash."
+
+  - id: curve-vyper-2023-07
+    date: 2023-07-30
+    kind: hack
+    assets: [alETH, msETH, pETH, CRV]
+    protocols: [curve]
+    tier_like: C
+    min_price_usd: null
+    duration_days: null
+    holder_loss_pct: "27"
+    recovered: false
+    summary: "A reentrancy-guard bug in Vyper compiler versions 0.2.15, 0.2.16 and 0.3.0 let attackers drain about $70M from several Curve pools."
+    sources:
+      - https://www.halborn.com/blog/post/explained-the-vyper-bug-hack-july-2023
+      - https://www.financemagnates.com/cryptocurrency/curve-finance-recovers-over-70-of-hacked-funds-report/
+    notes: "Stolen total reported $69-73M; ~73% (~$52-53M) returned within weeks, so aggregate LP loss ~27%, but highly pool-specific (Alchemix reported full return; others range up to ~100%). No stablecoin pools affected; relevant as compiler-level/venue risk."
+
+  - id: usdr-tangible-2023-10
+    date: 2023-10-11
+    kind: collapse
+    assets: [USDR]
+    protocols: [tangible]
+    tier_like: B
+    min_price_usd: "0.50"
+    duration_days: null
+    holder_loss_pct: "40"
+    recovered: false
+    summary: "Real-estate-backed yield stablecoin USDR collapsed to about $0.50 when a redemption run drained its liquid DAI reserve, leaving mostly illiquid property tokens."
+    sources:
+      - https://www.theblock.co/post/255946/real-usd-usdr-stablecoin-depegs-and-price-crashes-by-50
+      - https://cointelegraph.com/news/usdr-stablecoin-depeg-liquid-dai-treasury-drain-redemption
+    notes: "Low ~$0.504 on Oct 11, 2023 (pre-event cap ~$45M). Collateral was mostly illiquid tokenised real estate; Tangible proposed a liquidation/redemption plan and deprecated USDR. Final holder recovery not verified; estimate 20-50% loss."
+
+  - id: tether-freeze-2023-11
+    date: 2023-11-20
+    kind: freeze
+    assets: [USDT]
+    protocols: [tether]
+    tier_like: A
+    min_price_usd: null
+    duration_days: null
+    holder_loss_pct: "0"
+    recovered: true
+    summary: "Tether froze about $225M of USDT linked to a human-trafficking and pig-butchering network in cooperation with US law enforcement."
+    sources:
+      - https://www.theblock.co/post/263802/tether-freezes-225-million-worth-of-stolen-usdt-after-doj-investigation
+    notes: "Largest single freeze at the time; no impact on unrelated holders. Illustrates issuer address-level control."
+
+  - id: compound-humpy-governance-2024-07
+    date: 2024-07-28
+    kind: governance
+    assets: [COMP]
+    protocols: [compound]
+    tier_like: C
+    min_price_usd: null
+    duration_days: "5"
+    holder_loss_pct: "0"
+    recovered: true
+    summary: "A whale-backed group (Humpy / Golden Boys) narrowly passed Compound Proposal 289 to move ~499k COMP (~$24M) from the treasury into its goldCOMP vault; the proposal was later rescinded without execution."
+    sources:
+      - https://theblock.co/news/ecosystems/2024-07-28-24-million-compound-finance-proposal-passed-by-whale-over-dao-objections-307943
+      - https://rekt.news/the-humpy-dance
+    notes: "Passed 682,191 vs 633,636 votes on 2024-07-28. Sources describe the rescission slightly differently (cancelled vs withdrawn in a settlement). Governance capture risk on a parking venue; no loss for Compound v3 USDC suppliers."
+
+  - id: penpie-2024-09
+    date: 2024-09-03
+    kind: hack
+    assets: [wstETH, sUSDe, rswETH]
+    protocols: [penpie, pendle]
+    tier_like: C
+    min_price_usd: null
+    duration_days: null
+    holder_loss_pct: "0"
+    recovered: true
+    summary: "An attacker registered a fake Pendle market in Penpie (a third-party yield booster) and drained about $27M of reward-accounting funds via reentrancy; Pendle paused its own contracts as a precaution."
+    sources:
+      - https://rekt.news/penpie-rekt
+      - https://thedefiant.io/news/defi/pendle-pauses-contracts-after-yield-protocol-penpie-suffers-usd27-million-exploit
+    notes: "Reported $27.0-27.3M. Pendle core contracts were not exploited and direct PT holders lost nothing (holder_loss 0 applies to Pendle PT holders); Penpie depositors in affected pools bore the loss. Pendle's pause (said to protect ~$105M more) shows admin_pause can briefly block exits."
+
+  - id: usd0pp-usual-2025-01
+    date: 2025-01-10
+    kind: governance
+    assets: [USD0++]
+    protocols: [usual, morpho]
+    tier_like: B
+    min_price_usd: "0.89"
+    duration_days: null
+    holder_loss_pct: "2"
+    recovered: false
+    summary: "Usual unexpectedly introduced a $0.87 redemption floor for its bonded USD0++, sending it to ~$0.89-0.92 and stressing Morpho markets that priced it at a hard-coded 1:1."
+    sources:
+      - https://www.theblock.co/post/333995/usual-money-protocol-update
+      - https://blockworks.com/news/usual-depeg-spurs-defi-instability
+    notes: "Lows reported between $0.89 (Cointelegraph) and $0.915 (The Block). A 1:1 early-unstake option (forfeiting part of rewards) was added later, so holder loss is mostly forgone yield; range 0-13% depending on exit path. Key lesson for Pendle-style fixed yield: issuer can change redemption terms mid-term."
+
+  - id: ethena-bybit-2025-02
+    date: 2025-02-21
+    kind: hack
+    assets: [USDe]
+    protocols: [ethena, bybit]
+    tier_like: B
+    min_price_usd: null
+    duration_days: null
+    holder_loss_pct: "0"
+    recovered: true
+    summary: "The ~$1.5B Lazarus hack of Bybit put Ethena's Bybit-held hedge exposure at risk; Ethena reported its exposure was fully covered and USDe held its peg."
+    sources:
+      - https://governance.aave.com/t/chaos-labs-update-on-bybit-security-event-and-usde-market-reaction/21158
+      - https://cointelegraph.com/news/ethena-assures-users-solvency-after-bybit-hack
+    notes: "Near-miss for a Tier B counterparty dependency. ~$30M of unrealised derivatives PnL on Bybit (below the ~$46-65M reserve fund) was cut to zero the same day; spot backing sat in off-exchange custody (Copper Clearloop). Ethena processed a record ~$250M unstake without a severe depeg; Chaos Labs found no bad debt on Aave."
+
+  - id: fdusd-2025-04
+    date: 2025-04-02
+    kind: depeg
+    assets: [FDUSD]
+    protocols: [first-digital]
+    tier_like: A
+    min_price_usd: "0.87"
+    duration_days: "2"
+    holder_loss_pct: "0"
+    recovered: true
+    summary: "Fiat-backed FDUSD fell to about $0.87 after Justin Sun publicly claimed First Digital was insolvent; the issuer denied it and the peg recovered within days."
+    sources:
+      - https://cointelegraph.com/news/first-digital-redeems-26m-fdusd-after-stablecoin-depeg
+      - https://thedefiant.io/news/cefi/justin-sun-declares-first-digital-trust-insolvent-fdusd-depegs-binance-holds-1-fcdb4d5a
+    notes: "Most sources give a low of ~$0.87-0.90 (one outlier says $0.76). ~$26M redeemed after the event; back near $0.99 within days. Insolvency was an unproven allegation linked to the TUSD reserve dispute. Shows a fiat-backed coin can depeg on custody/attestation doubts alone."
+
+  - id: susd-synthetix-2025-04
+    date: 2025-04-10
+    kind: depeg
+    assets: [sUSD]
+    protocols: [synthetix]
+    tier_like: B
+    min_price_usd: "0.66"
+    duration_days: null
+    holder_loss_pct: "20"
+    recovered: false
+    summary: "SNX-backed sUSD drifted below peg from January 2025 and fell to about $0.66-0.68 in April after SIP-420 changed staking mechanics."
+    sources:
+      - https://decrypt.co/315338/synthetixs-susd-stablecoin-depegs-to-new-low-of-0-66
+      - https://cointelegraph.com/markets/synthetic-usd-stablecoin-fall-new-lows-depeg
+    notes: "Partial rebound to ~$0.77 by Apr 21, 2025; later price path and whether it fully re-pegged not verified. holder_loss is a mark-to-market estimate (range 0-30%)."
+
+  - id: resupply-2025-06
+    date: 2025-06-26
+    kind: hack
+    assets: [reUSD]
+    protocols: [resupply]
+    tier_like: B
+    min_price_usd: null
+    duration_days: null
+    holder_loss_pct: "0"
+    recovered: true
+    summary: "An exchange-rate manipulation on a freshly deployed Resupply lending market let an attacker borrow about $9.6M of reUSD against near-worthless collateral, creating bad debt."
+    sources:
+      - https://forklog.com/en/resupply-protocol-hacked-for-9-5-million/
+    notes: "Reported $9.3-10M. Bad debt of 10M reUSD was covered by ~2.87M repaid by Resupply/Convex treasuries and C2tP plus 6M burned from the 38.7M insurance pool (~15% haircut for insurance stakers); ~1.13M left with the DAO. reUSD holders made whole. Example of a donation/rounding attack on a freshly deployed lending market."
+
+  - id: usde-binance-2025-10
+    date: 2025-10-10
+    kind: depeg
+    assets: [USDe]
+    protocols: [ethena, binance]
+    tier_like: B
+    min_price_usd: "0.65"
+    duration_days: "0.1"
+    holder_loss_pct: "0"
+    recovered: true
+    summary: "During the Oct 10 crash USDe printed $0.65 on Binance's thin order book for roughly 90 minutes while on-chain venues like Curve held near $1 and redemptions worked."
+    sources:
+      - https://theblock.co/post/374295/binance-pays-283-million-in-compensation-following-fridays-depegs-covering-user-losses
+      - https://cointelegraph.com/news/usde-depeg-oracle-issues-ethena-founder
+    notes: "Venue-specific print; on-chain low was far shallower (~$0.99+ reported). Binance paid ~$283M compensation for oracle-driven liquidations. Holder who held through lost nothing; leveraged positions using venue price as oracle were liquidated."
+
+  - id: balancer-v2-2025-11
+    date: 2025-11-03
+    kind: hack
+    assets: [osETH, wstETH, BPT]
+    protocols: [balancer]
+    tier_like: C
+    min_price_usd: null
+    duration_days: null
+    holder_loss_pct: "75"
+    recovered: false
+    summary: "A rounding/invariant bug in Balancer v2 composable stable pools was exploited across several chains for about $120M+."
+    sources:
+      - https://blog.verichains.io/p/balancer-exploit-small-rounding-errors
+      - https://dappradar.com/blog/balancer-exploit-november-2025
+    notes: "Total reported $100-128M across ~9 chains; root cause rounding in EXACT_OUT swaps with non-integer scaling factors. ~$21M (osETH/osGNO) frozen or recovered early, so aggregate LP loss roughly 75-85%; per-pool loss ranges 0-100%. V3 unaffected. Same day as the Stream Finance disclosure."
+
+  - id: stream-xusd-2025-11
+    date: 2025-11-04
+    kind: collapse
+    assets: [xUSD]
+    protocols: [stream-finance]
+    tier_like: B
+    min_price_usd: "0.24"
+    duration_days: null
+    holder_loss_pct: "80"
+    recovered: false
+    summary: "Stream Finance froze withdrawals after an external fund manager disclosed a ~$93M loss; its yield dollar xUSD crashed to ~$0.24-0.30 and kept falling."
+    sources:
+      - https://www.theblock.co/post/377400/stream-finance-halts-withdrawals-93-million-loss
+      - https://cointelegraph.com/news/stream-finance-pauses-platform-finds-93m-loss
+    notes: "Later reports describe xUSD as ~95% depegged. Final recovery from legal process unknown; loss range 70-95%. Exposure of ~$285M in loans backed by Stream collateral spread to Morpho/Euler/Elixir."
+
+  - id: elixir-deusd-2025-11
+    date: 2025-11-06
+    kind: collapse
+    assets: [deUSD, sdeUSD]
+    protocols: [elixir, stream-finance]
+    tier_like: B
+    min_price_usd: "0.015"
+    duration_days: null
+    holder_loss_pct: "0"
+    recovered: false
+    summary: "Elixir sunset deUSD after Stream, which owed it ~$68M and held ~90% of supply, declined to repay; deUSD traded near zero while Elixir redeemed other holders 1:1."
+    sources:
+      - https://www.theblock.co/post/377961/elixir-sunsets-deusd-synthetic-stablecoin-following-stream-finance-unwinding-aims-full-redemptions
+      - https://cointelegraph.com/news/elixir-sunsets-stablecoin-amid-stream-finance-saga
+    notes: "holder_loss 0 applies to non-Stream holders who redeemed (Elixir reported 80% of holders redeemed in 48h, rest via snapshot claims); completion of claims not verified. Holders exposed via Stream or via curated lending vaults took large losses (see next entry)."
+
+  - id: curated-vault-stream-contagion-2025-11
+    date: 2025-11-04
+    kind: collapse
+    assets: [USDC]
+    protocols: [morpho, euler, mev-capital, re7]
+    tier_like: B
+    min_price_usd: null
+    duration_days: null
+    holder_loss_pct: "3.6"
+    recovered: false
+    summary: "Curated USDC lending vaults on Morpho and Euler that accepted xUSD/deUSD/USDX as collateral realised bad debt, e.g. MEV Capital USDC vault haircuts of 3.5% (Ethereum) and 12% (Arbitrum)."
+    sources:
+      - https://coinfomania.com/morpho-delists-elixir-sdeusd-bad-debt/
+      - https://thresholdnetwork.notion.site/Elixir-deUSD-Morpho-Vault-Incident-Postmortem-November-2025-2b0725fcbcb080b79a44c27b1b3935a3
+      - https://www.mexc.com/news/has-defi-learned-anything-from-yield-vault-collapse/171234
+    notes: "MEV Capital Ethereum USDC vault realised ~3.5-3.6% bad debt on sdeUSD/USDC; Arbitrum USDC vault lost ~600k of ~5M USDC (~12%) on xUSD/USDC. Elixir later ran a USDC claims process for affected lending markets, which may have reduced net losses (not verified). Euler oracle staleness after the xUSD crash was reported but not confirmed. Loss range 0-12% depending on vault. B-like: yield-bearing USDC vault shares; Aave v3 / Compound v3 core markets were not affected."
+
+  - id: usdx-stables-labs-2025-11
+    date: 2025-11-06
+    kind: collapse
+    assets: [USDX]
+    protocols: [stables-labs, lista, pancakeswap]
+    tier_like: B
+    min_price_usd: "0.30"
+    duration_days: null
+    holder_loss_pct: "70"
+    recovered: false
+    summary: "Stables Labs' delta-neutral synthetic dollar USDX lost its peg on 2025-11-06, trading between ~$0.30 and ~$0.68 in the following days, forcing emergency liquidations on Lista DAO."
+    sources:
+      - https://www.theblock.co/post/377917/synthetic-stablecoin-usdx-depegs-pancakeswap-lista
+      - https://forklog.com/en/usdx-stablecoin-loses-its-dollar-peg-drops-to-0-30/
+    notes: "Snapshot prices differ ($0.39 Lookonchain, $0.30 Forklog headline, ~$0.60 on Nov 7); cause unconfirmed (possibly hedge losses after the Balancer exploit). Later aggregator reports describe USDX as ~85% depegged; final recovery unknown, loss range 40-90%. Low-confidence holder_loss."
+
+  - id: aave-capo-wsteth-2026-03
+    date: 2026-03-10
+    kind: oracle
+    assets: [wstETH]
+    protocols: [aave-v3]
+    tier_like: A
+    min_price_usd: null
+    duration_days: null
+    holder_loss_pct: "0"
+    recovered: true
+    summary: "A CAPO oracle misconfiguration priced wstETH ~2.85% below market and triggered ~$26-27M of erroneous E-Mode liquidations on Aave; no bad debt, users compensated."
+    sources:
+      - https://www.theblock.co/post/393121/aave-oracle-glitch-wsteth
+      - https://governance.aave.com/t/post-mortem-exchange-rate-misallignment-on-wsteth-core-and-prime-instances/24269
+    notes: "Suppliers (aToken holders) lost nothing; liquidated borrowers lost ~499 ETH of liquidation bonus, compensated via 141.5 ETH recovered plus up to 345 ETH from the DAO. Shows oracle-config risk on the parking venue."
+
+  - id: resolv-usr-2026-03
+    date: 2026-03-22
+    kind: hack
+    assets: [USR, RLP]
+    protocols: [resolv, morpho]
+    tier_like: B
+    min_price_usd: "0.025"
+    duration_days: null
+    holder_loss_pct: "15"
+    recovered: false
+    summary: "An attacker with a compromised privileged minting key minted 50-80M unbacked USR and extracted about $25M, crashing USR on Curve before a partial rebound to ~$0.85."
+    sources:
+      - https://www.theblock.co/post/394582/resolvs-usr-stablecoin-depegs-after-attacker-mints-80-million-unbacked-tokens-extracts-roughly-25-million
+      - https://blockaid.io/blog/how-a-compromised-key-minted-80m-in-resolvs-usr-stablecoin-and-triggered-a-depeg
+    notes: "Lows vary by venue ($0.025 Curve print; $0.14-0.33 elsewhere). Resolv says collateral intact and the RLP insurance tranche absorbs losses; final USR holder recovery not verified, estimate range 0-30%. Gauntlet-curated Morpho vaults were exposed."
+
+  - id: kelp-rseth-aave-2026-04
+    date: 2026-04-18
+    kind: hack
+    assets: [rsETH, WETH]
+    protocols: [kelp, layerzero, aave-v3]
+    tier_like: A
+    min_price_usd: null
+    duration_days: null
+    holder_loss_pct: "1"
+    recovered: false
+    summary: "Kelp DAO's LayerZero rsETH bridge (1-of-1 verifier) was drained of ~116.5k rsETH (~$292M); the attacker posted it as Aave v3 collateral and borrowed WETH, leaving an estimated $124-230M of bad debt."
+    sources:
+      - https://www.theblock.co/post/397988/kelp-dao-293-million-defi-hack-lazarus-layerzero
+      - https://thedefiant.io/news/hacks/aave-models-usd124m-to-usd230m-in-bad-debt-from-kelp-exploit-layerzero-and-kelp-continue-to
+      - https://governance.aave.com/t/rseth-incident-report-april-20-2026/24580
+    notes: "Largest bad-debt event on the parking venue. Aave contracts were not exploited; the deficit sits in WETH reserves, not USDC. Aave's incident report modelled ~1.5% shortfall for Ethereum Core WETH under uniform socialisation, partly absorbed by Umbrella (~$50M staked aWETH) with a DAO treasury loan discussed. WETH utilisation hit 100%, blocking withdrawals for a time. Final allocation not found, so holder_loss is an estimate for WETH suppliers (range 0-1.5%) and ~0 for USDC suppliers. Treat as A-like venue tail risk (liquidity freeze + socialisation), not as a USDC loss."
+
+  - id: apxusd-2026-06
+    date: 2026-06-03
+    kind: depeg
+    assets: [apxUSD]
+    protocols: [apyx]
+    tier_like: B
+    min_price_usd: "0.90"
+    duration_days: null
+    holder_loss_pct: "4"
+    recovered: false
+    summary: "apxUSD, backed mainly by Strategy's STRC preferred shares, fell to ~$0.90-0.94 when STRC sold off after the Nasdaq close during a Bitcoin slide."
+    sources:
+      - https://thedefiant.io/apxusd-loses-dollar-peg-bitcoin-slide-strc-backed-collateral
+      - https://kitchen.steakhouse.financial/p/defi-markets-update-2026-06-10
+    notes: "One outlier report says $0.80. Morpho liquidations >$4M in a day with no bad debt. Later reported near $0.96 without full re-peg; holder_loss is mark-to-market (range 0-10%)."
+
+  - id: usde-binance-2026-09
+    date: 2026-09-22
+    kind: depeg
+    assets: [USDe]
+    protocols: [ethena, binance]
+    tier_like: B
+    min_price_usd: "0.92"
+    duration_days: "0.01"
+    holder_loss_pct: "0"
+    recovered: true
+    summary: "USDe briefly printed ~$0.92 on Binance on thin spot liquidity and recovered to ~$1.00 within minutes."
+    sources:
+      - https://www.kucoin.com/blog/usde-depeg-binance-0-92-1011-contagion-risk
+    notes: "Single exchange-blog source; low confidence. Venue-specific, no on-chain depeg reported."
