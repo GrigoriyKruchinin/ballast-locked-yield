@@ -39,9 +39,9 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 - [x] Structured logging with secret redaction (test that keys never appear)
 
 ### Storage
-- [ ] SQLAlchemy async models: market snapshots, rate snapshots, futures snapshots, NLY results, risk scores, paper positions, simulated txs, monitor events, decision log (entered/skipped + reason), backtest runs/results
-- [ ] Alembic setup + initial migration; migrations run in a dedicated container
-- [ ] Repository layer + tests (testcontainers or dockerized Postgres)
+- [x] SQLAlchemy async models: market snapshots, rate snapshots, futures snapshots, NLY results, risk scores, paper positions, simulated txs, monitor events, decision log (entered/skipped + reason), backtest runs/results
+- [ ] Alembic setup + initial migration (done, verified up/down/check on Postgres 16); migrations container (pending, Docker task)
+- [x] Repository layer + tests (sqlite by default, Postgres via `TEST_DATABASE_URL`)
 
 ### Data Collector
 - [x] Verify current docs and rate limits: Pendle API, DefiLlama, Alchemy, CEX futures APIs (subagent; summary to `docs/research/data-sources.md`)
