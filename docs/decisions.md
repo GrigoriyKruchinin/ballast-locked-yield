@@ -71,3 +71,11 @@ No Pendle on Starknet, Polygon, Tron or zkSync (non-EVM Starknet/Tron also lack 
 Notable: Monad sUSDe (~16.5M USD liquidity), Plasma sUSDe (~3.4M). Both are young chains with bridged (OFT) USDe: bridge risk.
 Default: **observe all Pendle chains** (Pendle API only, no RPC) for the report; **paper portfolio and Go criteria use
 Ethereum, Arbitrum, Base only**. Young chains can be reconsidered at the post-Stage-1 fork with data.
+
+## 2026-10-20: Parking venues refined
+
+- Parking pools must be core lending markets: DefiLlama pools with `poolMeta` are excluded (Aave *Umbrella* is slashable
+  staking, *Prime*/*Horizon* are separate instances, Compound *WETH-pool* is a different market). Minimum pool TVL 20M USD.
+- Added Sky Savings Rate (deposit USDS, receive sUSDS; redeemable any time) on Ethereum and Arbitrum as a third Tier A
+  parking venue, so the 35% per-protocol cap does not leave capital idle.
+- Benchmark parking rate for thresholds and the "parking + 3 pp" criterion = best whitelisted parking rate (conservative).

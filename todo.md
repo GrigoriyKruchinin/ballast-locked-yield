@@ -50,7 +50,9 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 - [x] Dated futures vs spot: public prices (Binance, OKX, Deribit) → annualized basis (data only)
 - [x] Gas price collector per chain (L2 execution + L1 data fee)
 - [ ] Celery beat schedule: snapshots every 15 min; retries, backoff, rate-limit handling
-- [ ] Opportunity Normalizer: all sources → `Opportunity`
+- [x] Opportunity Normalizer: all sources → `Opportunity`
+- [x] Collect + analyze pipeline (`ballast.pipeline`): sources → NLY → risk → allocation, verified live end-to-end
+- [ ] Cost cross-chain moves (USDC via CCTP, USDS bridges) between parking and positions on different chains
 
 ### Backtest on matured markets
 - [ ] Discover Pendle markets matured in the last 12–18 months on allowed chains (include failed/delisted: no survivorship bias)

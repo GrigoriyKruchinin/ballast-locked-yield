@@ -6,7 +6,7 @@ from hypothesis import strategies as st
 
 from ballast.costs.model import GasSnapshot, LiquidityImpactSlippage, QuotedSlippage, RoundTripCostModel
 from ballast.domain.models import Chain, SourceKind
-from tests.factories import pt
+from tests.factories import parking, pt
 
 GAS = GasSnapshot(
     Chain.ARBITRUM, gas_price_wei=10_000_000, native_usd=Decimal(3000), l1_fee_usd_per_tx=Decimal("0.02")
@@ -83,3 +83,10 @@ def test_min_position() -> None:
 def test_missing_gas_snapshot() -> None:
     with pytest.raises(LookupError):
         model().estimate(pt(chain=Chain.BASE), Decimal(1000))
+
+
+def test_parking_uses_lending_gas_units() -> None:
+    est = model().estimate(parking(), Decimal(10_000))
+    # 250k gas * 1e7 wei * 3000 / 1e18 = 0.0075 + 0.02 L1
+    assert est.gas_entry_usd == Decimal("0.0275")
+    assert est.fees_usd == 0

@@ -49,6 +49,35 @@ POOLS = [
         "underlyingTokens": ["0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"],
     },
     {"chain": "Solana", "project": "aave-v3", "pool": "p4", "apyBase": 3, "underlyingTokens": ["x"]},
+    # slashable staking / non-core instance must be ignored even with the right token
+    {
+        "chain": "Arbitrum",
+        "project": "aave-v3",
+        "pool": "p5",
+        "tvlUsd": 9e7,
+        "apyBase": 6.0,
+        "poolMeta": "Umbrella",
+        "underlyingTokens": [ARB_USDC],
+    },
+    # too small
+    {
+        "chain": "Arbitrum",
+        "project": "compound-v3",
+        "pool": "p6",
+        "tvlUsd": 1.9e6,
+        "apyBase": 3.1,
+        "underlyingTokens": [ARB_USDC],
+    },
+    # sky savings via llama slug
+    {
+        "chain": "Arbitrum",
+        "project": "sky-lending",
+        "symbol": "SUSDS",
+        "pool": "p7",
+        "tvlUsd": 3.6e8,
+        "apyBase": 3.8,
+        "underlyingTokens": ["0x6491c05a82219b8d1479057361ff1654749b876b"],
+    },
 ]
 
 
@@ -66,12 +95,12 @@ async def test_parking_matches_by_address() -> None:
     async with JsonHttpClient("https://y", transport=mock({"/pools": {"data": POOLS}})) as http:
         source = ParkingSource(DefiLlamaYields(http, WL), [Chain.ARBITRUM, Chain.BASE])
         opps = await source.fetch()
-    assert len(opps) == 1
-    opp = opps[0]
+    assert {o.key for o in opps} == {"parking:aave-v3:arbitrum:USDC:p1", "parking:sky:arbitrum:USDS:p7"}
+    opp = next(o for o in opps if o.protocol == "aave-v3")
     assert opp.kind is SourceKind.PARKING
     assert opp.quoted_apy == Decimal("0.0228")
     assert opp.maturity is None
-    assert opp.key == "parking:aave-v3:arbitrum:USDC"
+    assert opp.key == "parking:aave-v3:arbitrum:USDC:p1"
 
 
 async def test_parking_source_failure_returns_empty() -> None:

@@ -99,6 +99,7 @@ class RoundTripCostModel:
     swap_fee_bps: Decimal
     venue_fee_bps: Mapping[SourceKind, Decimal]
     exit_swap_slippage_bps: Decimal = Decimal(5)
+    parking_gas_units: int = 250_000  # lending supply / withdraw
 
     def estimate(self, opportunity: Opportunity, capital_usd: Decimal) -> CostEstimate:
         snapshot = self.gas.get(opportunity.chain)
@@ -112,9 +113,12 @@ class RoundTripCostModel:
             fees = capital_usd * (self.swap_fee_bps * legs + venue_bps) / BPS
             slip_entry = capital_usd * self.slippage.slippage_frac(opportunity, capital_usd)
             slip_exit = capital_usd * self.exit_swap_slippage_bps / BPS if needs_swap else ZERO
+            is_parking = opportunity.kind is SourceKind.PARKING
+            entry_units = self.parking_gas_units if is_parking else self.entry_gas_units
+            exit_units = self.parking_gas_units if is_parking else self.exit_gas_units
             return CostEstimate(
-                gas_entry_usd=round_up(snapshot.tx_cost_usd(self.entry_gas_units)),
-                gas_exit_usd=round_up(snapshot.tx_cost_usd(self.exit_gas_units)),
+                gas_entry_usd=round_up(snapshot.tx_cost_usd(entry_units)),
+                gas_exit_usd=round_up(snapshot.tx_cost_usd(exit_units)),
                 fees_usd=round_up(fees),
                 slippage_entry_usd=round_up(slip_entry),
                 slippage_exit_usd=round_up(slip_exit),

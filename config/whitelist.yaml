@@ -106,6 +106,7 @@ assets:
     par_redemption: true
     addresses:
       ethereum: "0xdC035D45d973E3EC169d2276DDab16f1e407384F"
+      arbitrum: "0x6491c05A82219b8D1479057361ff1654749b876b"
   - symbol: sUSDS
     peg_asset: USDS
     tier: A
@@ -155,3 +156,6 @@ parking:
   - protocol: compound-v3
     asset: USDC
     chains: [ethereum, arbitrum, base]
+  - protocol: sky
+    asset: USDS   # deposit USDS into the Sky Savings Rate (sUSDS); redeemable any time
+    chains: [ethereum, arbitrum]

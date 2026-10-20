@@ -63,19 +63,30 @@ def _pct(value: object) -> Decimal | None:
 
 @dataclass(slots=True)
 class DefiLlamaYields:
+    """Parking pools: whitelisted protocol + pinned underlying address + core market only.
+
+    Pools with ``poolMeta`` (e.g. Aave "Umbrella" slashable staking, "Prime"/"Horizon" instances,
+    Compound "WETH-pool") are not plain lending deposits and are excluded, as are small pools.
+    """
+
     http: JsonHttpClient
     whitelist: Whitelist
+    min_pool_tvl_usd: Decimal = Decimal(20_000_000)
 
     async def parking_pools(self, chains: Sequence[Chain]) -> list[ParkingPool]:
         body = await self.http.get("/pools")
         rows = body.get("data", []) if isinstance(body, dict) else []
         wanted: dict[tuple[str, Chain, str], str] = {}
+        slug_to_protocol = {
+            (info.llama_slug or name): name for name, info in self.whitelist.protocols.items()
+        }
         for park in self.whitelist.parking:
             asset = next(a for a in self.whitelist.assets if a.symbol == park.asset)
             for park_chain in park.chains:
                 address = asset.address_on(park_chain)
                 if park_chain in chains and address is not None:
-                    wanted[(park.protocol, park_chain, address.lower())] = asset.symbol
+                    project = self.whitelist.protocols[park.protocol].llama_slug or park.protocol
+                    wanted[(project, park_chain, address.lower())] = asset.symbol
         by_name = {name: chain for chain, name in LLAMA_CHAIN_NAMES.items()}
         now = utcnow()
         pools: list[ParkingPool] = []
@@ -92,10 +103,12 @@ class DefiLlamaYields:
             tvl = dec(row.get("tvlUsd"))
             if symbol is None or apy_base is None or tvl is None:
                 continue
+            if row.get("poolMeta") is not None or tvl < self.min_pool_tvl_usd:
+                continue
             pools.append(
                 ParkingPool(
                     pool_id=str(row.get("pool")),
-                    protocol=key[0],
+                    protocol=slug_to_protocol.get(key[0], key[0]),
                     chain=chain,
                     asset_symbol=symbol,
                     asset_address=str(tokens[0]),
@@ -124,7 +137,7 @@ class DefiLlamaYields:
 
 def parking_opportunity(pool: ParkingPool) -> Opportunity:
     return Opportunity(
-        key=f"parking:{pool.protocol}:{pool.chain.slug}:{pool.asset_symbol}",
+        key=f"parking:{pool.protocol}:{pool.chain.slug}:{pool.asset_symbol}:{pool.pool_id[:8]}",
         kind=SourceKind.PARKING,
         chain=pool.chain,
         venue=pool.protocol,
