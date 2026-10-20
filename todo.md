@@ -90,7 +90,7 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 
 ### Paper Portfolio
 - [x] Virtual 10,000 USD portfolio engine incl. gas and slippage (value-conservation property test); two books: `all` and `l2`
-- [ ] Daily snapshot: positions, accrued yield, parking balance, upcoming maturities (storage done; scheduling pending)
+- [x] Daily snapshot: positions, accrued yield, parking balance (upserted every scan); upcoming maturities in daily digest
 - [x] Maturity handling: redeem at par (peg-capped) → idle → reallocate
 
 ### Monitoring (research mode)
@@ -109,6 +109,7 @@ Agreed parameters: [docs/decisions.md](docs/decisions.md).
 ### Research and report
 - [ ] ≥ 4 weeks of live collection
 - [ ] Run `run-backtest` (out-of-sample) and `audit-risks`
+- [x] Go/No-Go data report generator (`ballast report`): live books, universe, NLY distribution, weekly opportunities, fork checks, tier premium vs incident loss
 - [ ] `docs/reports/stage-1-go-no-go.md`: metrics, NLY distribution, weekly opportunities, parking comparison, fork checks, incident catalog, risk assessment, recommendation, "Простыми словами" block
 - [ ] Go/No-Go criteria evaluated:
   - [ ] Net yield ≥ 0.5% / month on out-of-sample data (mandatory)

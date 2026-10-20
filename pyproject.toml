@@ -63,6 +63,7 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S", "ANN", "PLR", "DTZ", "RUF001"]
 "src/ballast/notify/**" = ["RUF001"]  # user-facing Russian text by design
+"src/ballast/analytics/report.py" = ["E501", "RUF001"]  # markdown table templates
 "migrations/**" = ["ANN", "N999"]
 
 [tool.ruff.lint.flake8-tidy-imports]

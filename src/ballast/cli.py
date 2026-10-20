@@ -8,6 +8,8 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
+from ballast.analytics.report import render_go_no_go
+from ballast.analytics.report import write as write_go_no_go
 from ballast.backtest.engine import BacktestAssumptions
 from ballast.backtest.runner import render_report, run_backtests, write_report
 from ballast.chains.client import JsonRpcChainClient, RpcError, decode_result, encode_call
@@ -142,6 +144,14 @@ async def _simulate() -> int:
     return 1 if failed else 0
 
 
+async def _report(output: str) -> int:
+    settings = settings_for_role(Role.ANALYTICS)
+    async with app_context(settings) as ctx, ctx.sessions() as session:
+        text = await render_go_no_go(session, ctx.catalog, [b.name for b in ctx.books])
+    print(f"report: {write_go_no_go(text, Path(output))}")
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="ballast", description="Ballast locked-yield research tool")
     parser.add_argument("--log-level", default="WARNING")
@@ -150,12 +160,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     sub.add_parser("verify-whitelist", help="check pinned token addresses on-chain (symbol, decimals)")
     sub.add_parser("notify-test", help="send a test Telegram message")
     sub.add_parser("simulate", help="fork-simulate entry/exit of current candidates on Anvil")
+    report = sub.add_parser("report", help="render the Stage 1 Go/No-Go data report")
+    report.add_argument("--output", default="docs/reports/stage-1-go-no-go.md")
     backtest = sub.add_parser("backtest", help="out-of-sample backtest on stored Pendle history")
     backtest.add_argument("--output", default="docs/reports")
     digest = sub.add_parser("digest", help="send the daily (or --weekly) digest now")
     digest.add_argument("--weekly", action="store_true")
     args = parser.parse_args(argv)
     configure_logging(args.log_level)
+    if args.command == "report":
+        return asyncio.run(_report(args.output))
     if args.command == "backtest":
         return asyncio.run(_backtest(args.output))
     if args.command == "digest":
